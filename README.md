@@ -11,9 +11,11 @@
     cd cz4031-project-2/database
     ```
 
-3. Use `docker-compose` to bring up the containers. During first creation, the database dump will be imported to the database automatically.
+3. Download the `database-dump.sql` file from junwei's onedrive, save it in the database folder in Step 2.
+
+4. Use `docker-compose` to bring up the containers. During first creation, the database dump will be imported to the database automatically.
     ```
     docker-compose up -d
     ```
 
-4. The database is accessible on port `5432` and pgadmin is accessible at port `8080`.
+5. The database is accessible on port `5432` and pgadmin is accessible at port `8080`.

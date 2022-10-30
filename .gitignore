@@ -1,2 +1,3 @@
 .idea/
 app/env/
+database/database-dump.sql

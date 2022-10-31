@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="../static/form-static/util.css" />
+<link rel="stylesheet" type="text/css" href="../static/form-static/main.css" />
+{% endblock head %}
+
+{% block body %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="blank200">
+			<!-- Blank Space -->
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-1"></div>
+		<div class="col-sm-10">
+			<center>
+				<h1 class="tagline">Q U E R Y - A N A L Y Z E R</h1>
+			</center>
+		</div>
+		<div class="col-sm-1"></div>
+	</div>
+	<div class="row">
+		<div class="blank100">
+			<!-- Blank Space -->
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-2"></div>
+		<div class="col-sm-8">
+			<center>
+				<!-- To get the query from the user, we use form, input, post method -->
+				<!-- After clicking the start button, you will be redirected to the /predict page as defined in action='predict' -->
+				<!-- Get method has privacy issue. E.g., We don't want bank details, password to be displayed on URL. Post method resolves that-->
+				<!-- Ironically, that is also the  downside of post method. It now removes the benefit of autocomplete based on browser history  -->
+				<form class="contact1-form validate-form" action="/getPlan" method="POST" enctype="multipart/form-data">
+					<div class="wrap-input1 validate-input" data-validate="Query Input is required">
+						<!-- autofocus puts the cursor in the text box for me -->
+						<!-- required ensures there's something filled in the input field -->
+						<!-- name attribute is the what the flask will query. request.form("query") -->
+						<!-- Input form for user to type in SQL query -->
+
+						<textarea class="input1" required type="text" autofocus name="query"
+							id="query"
+							placeholder="E.g., SELECT * FROM public.customer ORDER BY c_custkey ASC LIMIT 100"
+							style="width: 100%;height: 300px;"></textarea>
+
+						<span class="shadow-input1"></span>
+						<span class="shadow-input1"></span>
+					</div>
+					<!-- Instead of doing Input Type = "submit" <input type = "submit"> -->
+					<!-- Here, we did a button named "Start" -->
+					<div class="container-contact1-form-btn">
+						<button class="contact1-form-btn">
+							<span>Start<i class="" aria-hidden="true"></i></span>
+						</button>
+					</div>
+				</form>
+			</center>
+		</div>
+		<div class="col-sm-2"></div>
+	</div>
+	<div class="row">
+		<div class="blank100">
+			<!-- Blank Space -->
+		</div>
+	</div>
+	<div class="row footer">
+		<center>
+			CZ4031 AY22/S1 Group 48 | Github: https://github.com/leejunweisg/cz4031-project-2)
+		</center>
+	</div>
+</div>
+{% endblock body %}

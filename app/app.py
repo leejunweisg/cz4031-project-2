@@ -1,7 +1,6 @@
 
 import psycopg2
 from flask import Flask, jsonify, request
-from decimal import *
 
 app = Flask(__name__)
 

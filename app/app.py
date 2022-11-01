@@ -22,10 +22,11 @@ def getImptPlanDetails(queryPlan):
         if (isinstance(value, str)):
             if( attr.find("Alias") == -1 
                 & attr.find("Parent") == -1 
-                    & attr.find("Direction") == -1 
-                        & attr.find("Total") == -1):
-                interResult["text"] += " " + value
+                    & attr.find("Direction") == -1):
+                interResult["text"] += value + " "
     
+    # remove last space from string
+    interResult["text"] = interResult["text"][:-1]
     
     childrenDetails = []
      

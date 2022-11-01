@@ -4,6 +4,43 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
+nodeTypeList = []
+
+def getAllNodeType(queryPlan): 
+    nodeTypeList.append(queryPlan.get("Node Type"))
+    
+    if queryPlan.get("Plans") != None:
+        for plan in queryPlan.get("Plans"):
+            getAllNodeType(plan)
+    return 
+
+def queryPlanConfigParam(param):
+    match param:
+        case "bitmapscan":
+            return "enable_bitmapscan"
+        case "hashagg":
+            return "enable_hashagg"
+        case "Hash Join":
+            return "enable_hashjoin"
+        case "Index Scan":
+            return "enable_indexscan"
+        case "Index Only Scan":
+            return "enable_indexonlyscan"
+        case "Materialize":
+            return "enable_material"
+        case "Merge Join":
+            return "enable_mergejoin"
+        case "Nested Loop":
+            return "enable_nestloop"
+        case "Seq Scan":
+            return "enable_seqscan"
+        case "Sort":
+            return "enable_sort"
+        case "Tid Scan":
+            return "enable_tidscan"
+        case _:
+            return None    
+
 def get_db_connection():
     conn = psycopg2.connect(host='localhost',
                             database="TPC-H",
@@ -14,6 +51,37 @@ def get_db_connection():
 
 conn = get_db_connection()
 
+def getAltQueryPlan(queryPlan, queryResult, cur):
+    
+    # Get all node type from Query Plan Result
+    getAllNodeType(queryResult[0][0][0].get("Plan"))
+    
+    queryConfigParamList = []
+    
+    # Get list of query config settings parameters
+    for nodeType in nodeTypeList:
+        queryConfigParamList.append(queryPlanConfigParam(nodeType))
+        
+    # Remove None from list
+    filteredQueryConfigParamList = list(filter(lambda x: x != None, queryConfigParamList))
+     
+    for item in filteredQueryConfigParamList:
+        query = "SET LOCAL {} TO off;".format(item)
+        cur.execute(query)
+
+    cur.execute(queryPlan)
+    altPlanResult = cur.fetchall()
+    
+    # Reset query plan configuration
+    cur.execute("RESET ALL;")
+    
+    # Clear all list to prepare for next alternative query plan
+    filteredQueryConfigParamList.clear()
+    nodeTypeList.clear()
+    queryConfigParamList.clear()
+    
+    return altPlanResult
+
 @app.route('/getPlan', methods=['POST'])
 def getPlan():
     cur = conn.cursor()
@@ -21,75 +89,20 @@ def getPlan():
     
     queryInput = data["queryInput"]
     
-    queryPlan1 = """
+    queryPlan = """
     EXPLAIN (ANALYZE true, SETTINGS true, FORMAT JSON) {};
     """.format(queryInput)
     
-    queryPlan2 = """
-    SET LOCAL enable_nestloop TO off;
-    SET LOCAL enable_hashjoin TO off;
-    EXPLAIN (ANALYZE true, COSTS true, SETTINGS true, FORMAT JSON) {};
-    """.format(queryInput)
-    
-    cur.execute(queryPlan1)
+    cur.execute(queryPlan)
     planResult1 = cur.fetchall()
-    cur.execute(queryPlan2)
-    planResult2 = cur.fetchall()
     
-    # Reset query plan configuration
-    cur.execute("ROLLBACK")
-        
+    planResult2 = getAltQueryPlan(queryPlan, planResult1, cur)
+    
+    planResult3 = getAltQueryPlan(queryPlan, planResult2, cur)
+    
     cur.close()
 
-    return jsonify({"QueryPlan1": planResult1[0][0][0], "QueryPlan2": planResult2[0][0][0]})
-
-
-@app.route('/test', methods=['GET'])
-def test():
-
-    cur = conn.cursor()
-    
-    queryInput = """SELECT c_name, c_address 
-                    FROM customer 
-                    LEFT JOIN nation ON nation.n_nationkey=customer.c_nationkey 
-                    LEFT JOIN region ON nation.n_regionkey=region.r_regionkey 
-                    WHERE region.r_regionkey=1;"""
-        
-    queryPlan1 = """
-    EXPLAIN (ANALYZE true, COSTS true, SETTINGS true, FORMAT JSON) {};
-    """.format(queryInput)
-    
-    queryPlan2 = """
-    SET LOCAL enable_nestloop TO off;
-    SET LOCAL enable_hashjoin TO off;
-    EXPLAIN (ANALYZE true, COSTS true, SETTINGS true, FORMAT JSON) {};
-    """.format(queryInput)
-    
-    cur.execute(queryPlan1)
-    planResult1 = cur.fetchall()
-    cur.execute(queryPlan2)
-    planResult2 = cur.fetchall()
-    
-    # Reset query plan configuration
-    cur.execute("ROLLBACK")
-
-    # Query result
-    # cur.execute(queryInput)
-    # queryResult = cur.fetchall()
-    # print(f"[-] Query results:")
-    # # convert Decimal to string
-    # # currently convert ther whole result instead of just the Decimal
-    # json_str = json.dumps(queryResult, cls=DecimalEncoder)
-    # print(queryResult)
-
-    cur.close()
-
-    return jsonify({"QueryPlan1": planResult1[0][0][0], "QueryPlan2": planResult2[0][0][0]})
-
-@app.route('/hi', methods=['GET'])
-def hi():
-    return jsonify({"message": "Hello World!"})
-
+    return jsonify({"QueryPlan1": planResult1[0][0][0], "QueryPlan2": planResult2[0][0][0], "QueryPlan3": planResult3[0][0][0]})
 
 if __name__ == '__main__':
     app.run(debug=True)

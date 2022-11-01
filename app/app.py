@@ -29,6 +29,37 @@ def index():
         "index.html"
     )
 
+
+@app.route("/example")
+def example():
+    # data to generate the graph
+    graph_data = {
+        "plan1": {
+            "text": {"name": "I am the parent (plan 1)!"},
+            "children": [
+                {"text": {"name": "I am the left child!"}},
+                {"text": {"name": "I am the right child!"}}
+            ]
+        },
+        "plan2": {
+            "text": {"name": "I am the parent! (plan 2)"},
+            "children": [
+                {"text": {"name": "I am the left child!"}},
+                {"text": {"name": "I am the right child!"}}
+            ]
+        },
+
+    }
+
+    # a dictionary of variables that we wish to pass to the template
+    context = {
+        "graph_data": graph_data
+    }
+
+    # render template
+    return render_template("example.html", **context)
+
+
 # Flask by default supports only get method, so we need to add post inside the method's parameter
 @app.route('/getPlan', methods=['POST'])
 def getPlan():

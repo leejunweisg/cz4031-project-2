@@ -14,6 +14,34 @@ def getAllNodeType(queryPlan):
             getAllNodeType(plan)
     return 
 
+def getImptPlanDetails(queryPlan): 
+    interResult ={"text" : ""}
+    
+    # get all key:value pair with string value
+    for attr, value in queryPlan.items():
+        if (isinstance(value, str)):
+            if( attr.find("Alias") == -1 
+                & attr.find("Parent") == -1 
+                    & attr.find("Direction") == -1 
+                        & attr.find("Total") == -1):
+                interResult["text"] += " " + value
+    
+    
+    childrenDetails = []
+     
+    if queryPlan.get("Plans") != None:
+        for plan in queryPlan.get("Plans"):
+            childrenDetails.append(getImptPlanDetails(plan))
+    
+    if len(childrenDetails) != 0:
+        interResult["children"] = childrenDetails
+    
+    # dict(sorted(interResult.items(), key=lambda interResult: interResult[1]))
+    
+    return interResult
+
+
+
 def queryPlanConfigParam(param):
     match param:
         case "bitmapscan":
@@ -100,9 +128,20 @@ def getPlan():
     
     planResult3 = getAltQueryPlan(queryPlan, planResult2, cur)
     
+    planResultDiagram1 = getImptPlanDetails(planResult1[0][0][0].get("Plan"))
+    
+    planResultDiagram2 = getImptPlanDetails(planResult2[0][0][0].get("Plan"))
+    
+    planResultDiagram3 = getImptPlanDetails(planResult3[0][0][0].get("Plan"))
+    
     cur.close()
 
-    return jsonify({"QueryPlan1": planResult1[0][0][0], "QueryPlan2": planResult2[0][0][0], "QueryPlan3": planResult3[0][0][0]})
+    return jsonify({"QueryPlan1": planResult1[0][0][0],
+                    "QueryPlan2": planResult2[0][0][0], 
+                    "QueryPlan3": planResult3[0][0][0], 
+                    "planResultDiagram1": planResultDiagram1,
+                    "planResultDiagram2": planResultDiagram2,
+                    "planResultDiagram3": planResultDiagram3})
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -8,7 +8,7 @@
 {% block body %}
 <div class="container-fluid">
 	<div class="row">
-		<div class="blank200">
+		<div class="blank">
 			<!-- Blank Space -->
 		</div>
 	</div>
@@ -57,10 +57,113 @@
 						</button>
 					</div>
 				</form>
-			</center>
 		</div>
 		<div class="col-sm-2"></div>
 	</div>
+	<div class="row">
+		<div class="blank100">
+		</div>
+	</div>
+	<center>
+		<div class="tab">
+			<button class="tablinks" onclick="openCity(event, 'Plan 1')">Plan 1</button>
+			<button class="tablinks" onclick="openCity(event, 'Plan 2')">Plan 2</button>
+			<button class="tablinks" onclick="openCity(event, 'Plan 3')">Plan 3</button>
+			<button class="tablinks" onclick="openCity(event, 'Plan 4')">Plan 4</button>
+		  </div>
+		  
+		  <div id="Plan 1" class="tabcontent">
+			<h3>Plan 1</h3>
+		  </br>
+			<table>
+				<tr>
+				  <th>S_dist</th>
+				  <th>C_dist</th>
+				  <th>Cost</th>
+				  <th>Relevance</th>
+				</tr>
+				<tr>
+				  <td></td>
+				  <td></td>
+				  <td></td>
+				  <td></td>
+				</tr>
+			  </table>
+		  </div>
+		  
+		  <div id="Plan 2" class="tabcontent">
+			<h3>Plan 2</h3>
+			</br>
+			<table>
+				<tr>
+				  <th>S_dist</th>
+				  <th>C_dist</th>
+				  <th>Cost</th>
+				  <th>Relevance</th>
+				</tr>
+				<tr>
+				  <td></td>
+				  <td></td>
+				  <td></td>
+				  <td></td>
+				</tr>
+			  </table>
+		  </div>
+		  
+		  <div id="Plan 3" class="tabcontent">
+			<h3>Plan 3</h3>
+		</br>
+		<table>
+			<tr>
+			  <th>S_dist</th>
+			  <th>C_dist</th>
+			  <th>Cost</th>
+			  <th>Relevance</th>
+			</tr>
+			<tr>
+			  <td></td>
+			  <td></td>
+			  <td></td>
+			  <td></td>
+			</tr>
+		  </table>
+	  </div>
+		  <div id="Plan 4" class="tabcontent">
+			<h3>Plan 4</h3>
+		</br>
+		<table>
+			<tr>
+			  <th>S_dist</th>
+			  <th>C_dist</th>
+			  <th>Cost</th>
+			  <th>Relevance</th>
+			</tr>
+			<tr>
+			  <td></td>
+			  <td></td>
+			  <td></td>
+			  <td></td>
+			</tr>
+		  </table>
+	  </div>
+		  </div>
+
+		  <script>
+		  function openCity(evt, cityName) {
+			var i, tabcontent, tablinks;
+			tabcontent = document.getElementsByClassName("tabcontent");
+			for (i = 0; i < tabcontent.length; i++) {
+			  tabcontent[i].style.display = "none";
+			}
+			tablinks = document.getElementsByClassName("tablinks");
+			for (i = 0; i < tablinks.length; i++) {
+			  tablinks[i].className = tablinks[i].className.replace(" active", "");
+			}
+			document.getElementById(cityName).style.display = "block";
+			evt.currentTarget.className += " active";
+		  }
+		  </script>
+	</center>
 	<div class="row">
 		<div class="blank100">
 			<!-- Blank Space -->
@@ -70,6 +173,11 @@
 		<center>
 			CZ4031 AY22/S1 Group 48 | Github: https://github.com/leejunweisg/cz4031-project-2)
 		</center>
+	</div>
+	<div class="row">
+		<div class="blank">
+			<!-- Blank Space -->
+		</div>
 	</div>
 </div>
 {% endblock body %}

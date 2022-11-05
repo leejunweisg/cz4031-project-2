@@ -13,7 +13,7 @@ def getAllNodeType(queryPlan):
     if queryPlan.get("Plans") != None:
         for plan in queryPlan.get("Plans"):
             getAllNodeType(plan)
-    return
+    return nodeTypeList
 
 
 def getImptPlanDetails(queryPlan):
@@ -124,16 +124,6 @@ def add_header(response):
     return response
 
 
-@app.route("/")  # When to call this function
-# @app.route("/home")  # @ is a decorator which is used to call this function
-def index():
-    """ Renders the home page """
-    print("Renders the home page")
-    return render_template(
-        "index.html"
-    )
-
-
 @app.route("/example")
 def example():
     # data to generate the graph
@@ -199,13 +189,55 @@ def example():
     # render template
     return render_template("example.html", **context)
 
+# ============================================================================================
 
-# Flask by default supports only get method, so we need to add post inside the method's parameter
-@app.route('/getPlan', methods=['POST'])
-def getPlan():
+
+@app.route("/", methods=['GET', 'POST'])
+def index():
+    if request.method == 'GET':
+        """ Renders the home page """
+        print("Renders the home page")
+        return render_template(
+            "index.html",
+            query="",
+        )
+    else:
+        """ Process the query """
+        print("Process the query")
+        query = request.form['query']
+        print(query)
+
+        # Use getPlan function to get the jsonify
+        # {"QueryPlan1": planResult1[0][0][0],
+        # "QueryPlan2": planResult2[0][0][0],
+        # "QueryPlan3": planResult3[0][0][0],
+        # "planResultDiagram1": planResultDiagram1,
+        # "planResultDiagram2": planResultDiagram2,
+        # "planResultDiagram3": planResultDiagram3}
+        queryResult = getPlan(query)
+        # return queryResult
+
+        # queryResult is an json object
+
+        # a dictionary of variables that we wish to pass to the template
+        plan_data = [queryResult["QueryPlan1"],
+                     queryResult["QueryPlan2"], queryResult["QueryPlan3"]]
+        graph_data = {"Plan1": queryResult["planResultDiagram1"],
+                      "Plan2": queryResult["planResultDiagram2"],
+                      "Plan3": queryResult["planResultDiagram3"]}
+
+        # print(plan_data[0]["execution_time"])
+        # print(plan_data[1]["execution_time"])
+        # print(plan_data[2]["execution_time"])
+        # return plan_data[0]
+        # plan_data[loop.index - 1]["execution_time"]
+
+        # render template
+        return render_template("index.html", query=query, plan_data=plan_data, graph_data=graph_data)
+
+
+def getPlan(queryInput):
     cur = conn.cursor()
-    # var queryInput = goes to the current request, into the form, and get the parameter called query
-    queryInput = request.form["query"]
 
     queryPlan = """
     EXPLAIN (ANALYZE true, SETTINGS true, FORMAT JSON) {};
@@ -226,100 +258,13 @@ def getPlan():
 
     cur.close()
 
-    # return jsonify({"QueryPlan1": planResult1[0][0][0],
-    #                 "QueryPlan2": planResult2[0][0][0],
-    #                 "QueryPlan3": planResult3[0][0][0],
-    #                 "planResultDiagram1": planResultDiagram1,
-    #                 "planResultDiagram2": planResultDiagram2,
-    #                 "planResultDiagram3": planResultDiagram3})
-
-    # return jsonify({"QueryPlan1": planResult1[0][0][0], "QueryPlan2": planResult2[0][0][0]})
-    # Can take more than 1 argument, if it takes another arg, you can pass in the name of any variable you want.
-    # LHS = RHS; LHS is the name of a var I want to give to the template, RHS is the value of that var.
-    return render_template(
-        "index.html",
-        queryInput=queryInput,
-        planResult1=planResult1[0][0][0],
-        planResult2=planResult2[0][0][0]
-    )
-
-
-@app.route('/testGetPlan', methods=['POST'])
-def testGetPlan():
-    cur = conn.cursor()
-    data = request.get_json()
-
-    queryInput = data["queryInput"]
-
-    queryPlan = """
-    EXPLAIN (ANALYZE true, SETTINGS true, FORMAT JSON) {};
-    """.format(queryInput)
-
-    cur.execute(queryPlan)
-    planResult1 = cur.fetchall()
-
-    planResult2 = getAltQueryPlan(queryPlan, planResult1, cur)
-
-    planResult3 = getAltQueryPlan(queryPlan, planResult2, cur)
-
-    planResultDiagram1 = getImptPlanDetails(planResult1[0][0][0].get("Plan"))
-
-    planResultDiagram2 = getImptPlanDetails(planResult2[0][0][0].get("Plan"))
-
-    planResultDiagram3 = getImptPlanDetails(planResult3[0][0][0].get("Plan"))
-
-    cur.close()
-
-    return jsonify({"QueryPlan1": planResult1[0][0][0],
-                    "QueryPlan2": planResult2[0][0][0],
-                    "QueryPlan3": planResult3[0][0][0],
-                    "planResultDiagram1": planResultDiagram1,
-                    "planResultDiagram2": planResultDiagram2,
-                    "planResultDiagram3": planResultDiagram3})
-
-
-# @app.route('/test', methods=['GET'])
-# def test():
-
-#     cur = conn.cursor()
-
-#     queryInput = """SELECT c_name, c_address
-#                     FROM customer
-#                     LEFT JOIN nation ON nation.n_nationkey=customer.c_nationkey
-#                     LEFT JOIN region ON nation.n_regionkey=region.r_regionkey
-#                     WHERE region.r_regionkey=1;"""
-
-#     queryPlan1 = """
-#     EXPLAIN (ANALYZE true, COSTS true, SETTINGS true, FORMAT JSON) {};
-#     """.format(queryInput)
-
-#     queryPlan2 = """
-#     SET LOCAL enable_nestloop TO off;
-#     SET LOCAL enable_hashjoin TO off;
-#     EXPLAIN (ANALYZE true, COSTS true, SETTINGS true, FORMAT JSON) {};
-#     """.format(queryInput)
-
-#     cur.execute(queryPlan1)
-#     planResult1 = cur.fetchall()
-#     cur.execute(queryPlan2)
-#     planResult2 = cur.fetchall()
-
-#     # Reset query plan configuration
-#     cur.execute("ROLLBACK")
-
-#     # Query result
-#     # cur.execute(queryInput)
-#     # queryResult = cur.fetchall()
-#     # print(f"[-] Query results:")
-#     # # convert Decimal to string
-#     # # currently convert ther whole result instead of just the Decimal
-#     # json_str = json.dumps(queryResult, cls=DecimalEncoder)
-#     # print(queryResult)
-
-#     cur.close()
-
-#     return jsonify({"QueryPlan1": planResult1[0][0][0], "QueryPlan2": planResult2[0][0][0]})
+    return {"QueryPlan1": planResult1[0][0][0],
+            "QueryPlan2": planResult2[0][0][0],
+            "QueryPlan3": planResult3[0][0][0],
+            "planResultDiagram1": planResultDiagram1,
+            "planResultDiagram2": planResultDiagram2,
+            "planResultDiagram3": planResultDiagram3}
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5001, debug=True)

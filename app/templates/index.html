@@ -31,18 +31,17 @@
 		<div class="col-sm-8">
 			<center>
 				<!-- To get the query from the user, we use form, input, post method -->
-				<!-- After clicking the start button, you will be redirected to the /predict page as defined in action='predict' -->
+				<!-- After clicking the start button, you will be redirected to the / same page as defined in action='/' -->
 				<!-- Get method has privacy issue. E.g., We don't want bank details, password to be displayed on URL. Post method resolves that-->
 				<!-- Ironically, that is also the  downside of post method. It now removes the benefit of autocomplete based on browser history  -->
-				<form class="contact1-form validate-form" action="/getPlan" method="POST" enctype="multipart/form-data">
+				<form class="contact1-form validate-form" action="/" method="POST" enctype="multipart/form-data">
 					<div class="wrap-input1 validate-input" data-validate="Query Input is required">
 						<!-- autofocus puts the cursor in the text box for me -->
 						<!-- required ensures there's something filled in the input field -->
 						<!-- name attribute is the what the flask will query. request.form("query") -->
 						<!-- Input form for user to type in SQL query -->
 
-						<textarea class="input1" required type="text" autofocus name="query"
-							id="query"
+						<textarea class="input1" required type="text" autofocus name="query" id="query"
 							placeholder="E.g., SELECT * FROM public.customer ORDER BY c_custkey ASC LIMIT 100"
 							style="width: 100%;height: 300px;"></textarea>
 
@@ -65,119 +64,79 @@
 		</div>
 	</div>
 	<center>
+		<!-- Initialize a list called plans -->
+		{% set plans = ["Plan 1", "Plan 2", "Plan 3"] %}
 		<div class="tab">
-			<button class="tablinks" onclick="openCity(event, 'Plan 1')">Plan 1</button>
-			<button class="tablinks" onclick="openCity(event, 'Plan 2')">Plan 2</button>
-			<button class="tablinks" onclick="openCity(event, 'Plan 3')">Plan 3</button>
-			<button class="tablinks" onclick="openCity(event, 'Plan 4')">Plan 4</button>
-		  </div>
-		  
-		  <div id="Plan 1" class="tabcontent">
-			<h3>Plan 1</h3>
-		  </br>
-			<table>
-				<tr>
-				  <th>S_dist</th>
-				  <th>C_dist</th>
-				  <th>Cost</th>
-				  <th>Relevance</th>
-				</tr>
-				<tr>
-				  <td></td>
-				  <td></td>
-				  <td></td>
-				  <td></td>
-				</tr>
-			  </table>
-		  </div>
-		  
-		  <div id="Plan 2" class="tabcontent">
-			<h3>Plan 2</h3>
-			</br>
-			<table>
-				<tr>
-				  <th>S_dist</th>
-				  <th>C_dist</th>
-				  <th>Cost</th>
-				  <th>Relevance</th>
-				</tr>
-				<tr>
-				  <td></td>
-				  <td></td>
-				  <td></td>
-				  <td></td>
-				</tr>
-			  </table>
-		  </div>
-		  
-		  <div id="Plan 3" class="tabcontent">
-			<h3>Plan 3</h3>
-		</br>
-		<table>
-			<tr>
-			  <th>S_dist</th>
-			  <th>C_dist</th>
-			  <th>Cost</th>
-			  <th>Relevance</th>
-			</tr>
-			<tr>
-			  <td></td>
-			  <td></td>
-			  <td></td>
-			  <td></td>
-			</tr>
-		  </table>
-	  </div>
-		  <div id="Plan 4" class="tabcontent">
-			<h3>Plan 4</h3>
-		</br>
-		<table>
-			<tr>
-			  <th>S_dist</th>
-			  <th>C_dist</th>
-			  <th>Cost</th>
-			  <th>Relevance</th>
-			</tr>
-			<tr>
-			  <td></td>
-			  <td></td>
-			  <td></td>
-			  <td></td>
-			</tr>
-		  </table>
-	  </div>
-		  </div>
+			{% for plan in plans %}
+			<!-- Make a button class for each plan -->
+			<button class="tablinks" onclick="openCity(event, '{{ plan }}')">{{ plan }}</button>
+			{% endfor %}
+		</div>
 
-		  <script>
-		  function openCity(evt, cityName) {
-			var i, tabcontent, tablinks;
-			tabcontent = document.getElementsByClassName("tabcontent");
-			for (i = 0; i < tabcontent.length; i++) {
-			  tabcontent[i].style.display = "none";
-			}
-			tablinks = document.getElementsByClassName("tablinks");
-			for (i = 0; i < tablinks.length; i++) {
-			  tablinks[i].className = tablinks[i].className.replace(" active", "");
-			}
-			document.getElementById(cityName).style.display = "block";
-			evt.currentTarget.className += " active";
-		  }
-		  </script>
+		<!-- For each plan in plans, we will display the plan number -->
+		{% for plan in plans %}
+		<div id="{{ plan }}" class="tabcontent">
+			{% if not query %}
+			<!-- If the query is empty, then we will display this message -->
+			<h1>Enter a query to see the plan</h1>
+
+			{% else %}
+			<!-- For each plan in plans, we will display the graph -->
+			<!-- Display a table with attributes 'Execution Time', 'Planning Time', 'Total Cost'  -->
+			<h3>Table {{ plan }}</h3>
+			<table class="table table-striped">
+				<!-- <div id="graph-{{ loop.index }}" style="width: 100vw; height: 100vh"></div> -->
+				<thead>
+					<tr>
+						<th>Execution Time</th>
+						<th>Planning Time</th>
+						<th>Total Cost</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>{{ plan_data[loop.index-1]["Execution Time"] }}</td>
+						<td>{{ plan_data[loop.index-1]["Planning Time"] }}</td>
+						<td>{{ plan_data[loop.index-1]['Plan']["Total Cost"] }}</td>
+					</tr>
+				</tbody>
+			</table>
+
+		</div>
+		{% endif %}
+		{% endfor %}
+</div>
+
+<script>
+	function openCity(evt, cityName) {
+		var i, tabcontent, tablinks;
+		tabcontent = document.getElementsByClassName("tabcontent");
+		for (i = 0; i < tabcontent.length; i++) {
+			tabcontent[i].style.display = "none";
+		}
+		tablinks = document.getElementsByClassName("tablinks");
+		for (i = 0; i < tablinks.length; i++) {
+			tablinks[i].className = tablinks[i].className.replace(" active", "");
+		}
+		document.getElementById(cityName).style.display = "block";
+		evt.currentTarget.className += " active";
+	}
+</script>
+</center>
+<div class="row">
+	<div class="blank100">
+		<!-- Blank Space -->
+	</div>
+</div>
+<div class="row footer">
+	<center>
+		CZ4031 AY22/S1 Group 48 | Github: https://github.com/leejunweisg/cz4031-project-2)
 	</center>
-	<div class="row">
-		<div class="blank100">
-			<!-- Blank Space -->
-		</div>
+</div>
+<div class="row">
+	<div class="blank">
+		<!-- Blank Space -->
 	</div>
-	<div class="row footer">
-		<center>
-			CZ4031 AY22/S1 Group 48 | Github: https://github.com/leejunweisg/cz4031-project-2)
-		</center>
-	</div>
-	<div class="row">
-		<div class="blank">
-			<!-- Blank Space -->
-		</div>
-	</div>
+</div>
 </div>
 {% endblock body %}

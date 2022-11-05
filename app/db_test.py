@@ -3,7 +3,7 @@ import psycopg2
 # constants
 DATABASE = "TPC-H"
 HOST = "localhost"
-PORT = "5433"
+PORT = "5432"
 USER = "postgres"
 PASSWORD = "password123"
 

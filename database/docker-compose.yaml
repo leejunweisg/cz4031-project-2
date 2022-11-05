@@ -11,11 +11,11 @@ services:
       POSTGRES_PASSWORD: password123
       PGDATA: /data/postgres
     volumes:
-       - postgres:/data/postgres
+      - postgres:/data/postgres
     ports:
       - "5432:5432"
     restart: unless-stopped
-  
+
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
@@ -23,11 +23,11 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
     volumes:
-       - pgadmin:/var/lib/pgadmin
+      - pgadmin:/var/lib/pgadmin
     ports:
       - "8080:80"
     restart: unless-stopped
 
 volumes:
-    postgres:
-    pgadmin:
+  postgres:
+  pgadmin:

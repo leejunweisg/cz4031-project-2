@@ -1,142 +1,191 @@
-{% extends "layout.html" %}
+{% extends "outline.html" %}
 
-{% block head %}
-<link rel="stylesheet" type="text/css" href="../static/form-static/util.css" />
-<link rel="stylesheet" type="text/css" href="../static/form-static/main.css" />
-{% endblock head %}
+{% block title %}CZ4031 Project 2{% endblock title %}
+
+{% block css %}
+  <link rel="stylesheet" href="../static/css/Treant.css" type="text/css"/>
+{% endblock css %}
 
 {% block body %}
-<div class="container-fluid">
-	<div class="row">
-		<div class="blank">
-			<!-- Blank Space -->
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-sm-1"></div>
-		<div class="col-sm-10">
-			<center>
-				<h1 class="tagline">Q U E R Y - A N A L Y Z E R</h1>
-			</center>
-		</div>
-		<div class="col-sm-1"></div>
-	</div>
-	<div class="row">
-		<div class="blank100">
-			<!-- Blank Space -->
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-sm-2"></div>
-		<div class="col-sm-8">
-			<center>
-				<!-- To get the query from the user, we use form, input, post method -->
-				<!-- After clicking the start button, you will be redirected to the / same page as defined in action='/' -->
-				<!-- Get method has privacy issue. E.g., We don't want bank details, password to be displayed on URL. Post method resolves that-->
-				<!-- Ironically, that is also the  downside of post method. It now removes the benefit of autocomplete based on browser history  -->
-				<form class="contact1-form validate-form" action="/" method="POST" enctype="multipart/form-data">
-					<div class="wrap-input1 validate-input" data-validate="Query Input is required">
-						<!-- autofocus puts the cursor in the text box for me -->
-						<!-- required ensures there's something filled in the input field -->
-						<!-- name attribute is the what the flask will query. request.form("query") -->
-						<!-- Input form for user to type in SQL query -->
 
-						<textarea class="input1" required type="text" autofocus name="query" id="query"
-							placeholder="E.g., SELECT * FROM public.customer ORDER BY c_custkey ASC LIMIT 100"
-							style="width: 100%;height: 300px;"></textarea>
 
-						<span class="shadow-input1"></span>
-						<span class="shadow-input1"></span>
-					</div>
-					<!-- Instead of doing Input Type = "submit" <input type = "submit"> -->
-					<!-- Here, we did a button named "Start" -->
-					<div class="container-contact1-form-btn">
-						<button class="contact1-form-btn">
-							<span>Start<i class="" aria-hidden="true"></i></span>
-						</button>
-					</div>
-				</form>
-		</div>
-		<div class="col-sm-2"></div>
-	</div>
-	<div class="row">
-		<div class="blank100">
-		</div>
-	</div>
-	<center>
-		<!-- Initialize a list called plans -->
-		{% set plans = ["Plan 1", "Plan 2", "Plan 3"] %}
-		<div class="tab">
-			{% for plan in plans %}
-			<!-- Make a button class for each plan -->
-			<button class="tablinks" onclick="openCity(event, '{{ plan }}')">{{ plan }}</button>
-			{% endfor %}
-		</div>
+  <div class="section p-0">
 
-		<!-- For each plan in plans, we will display the plan number -->
-		{% for plan in plans %}
-		<div id="{{ plan }}" class="tabcontent">
-			{% if not query %}
-			<!-- If the query is empty, then we will display this message -->
-			<h1>Enter a query to see the plan</h1>
 
-			{% else %}
-			<!-- For each plan in plans, we will display the graph -->
-			<!-- Display a table with attributes 'Execution Time', 'Planning Time', 'Total Cost'  -->
-			<h3>Table {{ plan }}</h3>
-			<table class="table table-striped">
-				<!-- <div id="graph-{{ loop.index }}" style="width: 100vw; height: 100vh"></div> -->
-				<thead>
-					<tr>
-						<th>Execution Time</th>
-						<th>Planning Time</th>
-						<th>Total Cost</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>{{ plan_data[loop.index-1]["Execution Time"] }}</td>
-						<td>{{ plan_data[loop.index-1]["Planning Time"] }}</td>
-						<td>{{ plan_data[loop.index-1]['Plan']["Total Cost"] }}</td>
-					</tr>
-				</tbody>
-			</table>
+    <div class="container">
+      <h1 class="title mb-5">AQP Visualiser</h1>
 
-		</div>
-		{% endif %}
-		{% endfor %}
-</div>
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title font-weight-bold">Query</h3>
+              <h6 class="card-subtitle mt-2 text-muted">Enter your SQL query here!</h6>
+              <form method="POST">
+                <div class="form-group">
+                  <label for="id-query"> </label>
+                  <textarea class="form-control form-control-success" id="id-query" placeholder="SELECT * FROM USERS;"
+                            name="query"
+                            style="font-size:1.3em" required></textarea>
+                </div>
+                <div class="float-right">
+                  <button class="btn btn-primary">Go!</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
 
-<script>
-	function openCity(evt, cityName) {
-		var i, tabcontent, tablinks;
-		tabcontent = document.getElementsByClassName("tabcontent");
-		for (i = 0; i < tabcontent.length; i++) {
-			tabcontent[i].style.display = "none";
-		}
-		tablinks = document.getElementsByClassName("tablinks");
-		for (i = 0; i < tablinks.length; i++) {
-			tablinks[i].className = tablinks[i].className.replace(" active", "");
-		}
-		document.getElementById(cityName).style.display = "block";
-		evt.currentTarget.className += " active";
-	}
-</script>
-</center>
-<div class="row">
-	<div class="blank100">
-		<!-- Blank Space -->
-	</div>
-</div>
-<div class="row footer">
-	<center>
-		CZ4031 AY22/S1 Group 48 | Github: https://github.com/leejunweisg/cz4031-project-2)
-	</center>
-</div>
-<div class="row">
-	<div class="blank">
-		<!-- Blank Space -->
-	</div>
-</div>
-</div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title font-weight-bold">Results</h3>
+              <ul class="nav nav-tabs nav-tabs-primary" role="tablist">
+                <!-- Tab-buttons for each plan -->
+                {% for idx in range(1, 4) %}
+                  <li class="nav-item">
+                    <a class="nav-link{% if idx==1 %} active show{% endif %}" data-toggle="tab" href="#plan{{ idx }}" role="tablist">
+                      Plan {{ idx }}
+                    </a>
+                  </li>
+                {% endfor %}
+
+              </ul>
+              <div class="tab-content tab-space pb-2">
+                <!-- Tab-panes for each plan -->
+                {% for idx in range(1, 4) %}
+                  <!-- Plan {{ idx }} -->
+                  <div class="tab-pane{% if idx==1 %} active show{% endif %}" id="plan{{ idx }}">
+                    <!-- Metrics row -->
+                    <div class="row">
+                      <div class="col-md-12">
+                        <h4>Metrics</h4>
+                      </div>
+                      <div class="col-md-3">
+                        <h5 class="font-weight-bold mb-1">Cost</h5>
+                        <p>156.12</p>
+                      </div>
+                      <div class="col-md-3">
+                        <h5 class="font-weight-bold mb-1">Joins</h5>
+                        <p>5 joins</p>
+                      </div>
+                      <div class="col-md-3">
+                        <h5 class="font-weight-bold mb-1">Joins</h5>
+                        <p>5 joins</p>
+                      </div>
+                      <div class="col-md-3">
+                        <h5 class="font-weight-bold mb-1">Joins</h5>
+                        <p>5 joins</p>
+                      </div>
+                    </div>
+
+                    <!-- Description row -->
+                    <div class="row mt-3">
+                      <div class="col-md-12">
+                        <h4>Description</h4>
+                        <p>
+                          First, a join is done on the xxx table and bla bla black sheep I don't know what else to
+                          write.
+                          Next, a index scan is performed on the. First, a join is done on the xxx table and bla bla
+                          black
+                          sheep I don't know what else to write.
+                          Next, a index scan is performed on the.
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Graph row -->
+                    <div class="row mt-3">
+                      <div class="col-md-12">
+                        <h4>Graph</h4>
+                        <div id="graph-{{ idx }}"></div>
+                        <button class="btn btn-sm btn-info" onclick="generateGraph(this, {{ idx }})">Display graph
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
 {% endblock body %}
+
+{% block js %}
+  <script src="../static/js/plugins/raphael.js"></script>
+  <script src="../static/js/plugins/Treant.js"></script>
+  <script>
+      const generateGraph = (btn, idx) => {
+          btn.style.display = 'none';
+          switch (idx) {
+              case 1:
+                  Treant({
+                      chart: {
+                          container: "#graph-1"
+                      },
+                      nodeStructure: {
+                          text: {name: "Parent node"},
+                          children: [
+                              {
+                                  text: {name: "First child"}
+                              },
+                              {
+                                  text: {name: "Second child"}
+                              }
+                          ]
+                      }
+                  }, function () {
+                  }, $);
+                  break;
+              case 2:
+                  Treant({
+                      chart: {
+                          container: "#graph-2"
+                      },
+                      nodeStructure: {
+                          text: {name: "Parent node"},
+                          children: [
+                              {
+                                  text: {name: "First child"}
+                              },
+                              {
+                                  text: {name: "Second child"}
+                              }
+                          ]
+                      }
+                  }, function () {
+                  }, $);
+                  break;
+              case 3:
+                  Treant({
+                      chart: {
+                          container: "#graph-3"
+                      },
+                      nodeStructure: {
+                          text: {name: "Parent node"},
+                          children: [
+                              {
+                                  text: {name: "First child"}
+                              },
+                              {
+                                  text: {name: "Second child"}
+                              }
+                          ]
+                      }
+                  }, function () {
+                  }, $);
+                  break;
+              default:
+                  alert("Could not generate graph!");
+          }
+      }
+  </script>
+
+{% endblock js %}

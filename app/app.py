@@ -224,6 +224,11 @@ def getPlan(queryInput):
         queryInput
     )
 
+    result = {
+        "plan_data": {"Plan 1": {}, "Plan 2": {}, "Plan 3": {}},
+        "graph_data": {"Plan 1": {}, "Plan 2": {}, "Plan 3": {}},
+    }
+
     try:
         cur.execute(queryPlan)
         planResult1 = cur.fetchall()
@@ -240,8 +245,6 @@ def getPlan(queryInput):
 
         print(planResultDiagram1 == planResultDiagram2)
 
-        result = {"plan_data": {}, "graph_data": {}}
-
         result["plan_data"]["Plan 1"] = planResult1[0][0][0]
         result["graph_data"]["Plan 1"] = planResultDiagram1
 
@@ -249,6 +252,7 @@ def getPlan(queryInput):
         if planResultDiagram2 != planResultDiagram1:
             result["plan_data"]["Plan 2"] = planResult2[0][0][0]
             result["graph_data"]["Plan 2"] = planResultDiagram2
+
         if (
             planResultDiagram3 != planResultDiagram1
             and planResultDiagram3 != planResultDiagram2
@@ -279,6 +283,11 @@ def testGetPlan():
         queryInput
     )
 
+    result = {
+        "plan_data": {"Plan 1": {}, "Plan 2": {}, "Plan 3": {}},
+        "graph_data": {"Plan 1": {}, "Plan 2": {}, "Plan 3": {}},
+    }
+
     try:
         cur.execute(queryPlan)
         planResult1 = cur.fetchall()
@@ -295,8 +304,6 @@ def testGetPlan():
 
         print(planResultDiagram1 == planResultDiagram2)
 
-        result = {"plan_data": {}, "graph_data": {}}
-
         result["plan_data"]["Plan 1"] = planResult1[0][0][0]
         result["graph_data"]["Plan 1"] = planResultDiagram1
 
@@ -304,6 +311,7 @@ def testGetPlan():
         if planResultDiagram2 != planResultDiagram1:
             result["plan_data"]["Plan 2"] = planResult2[0][0][0]
             result["graph_data"]["Plan 2"] = planResultDiagram2
+
         if (
             planResultDiagram3 != planResultDiagram1
             and planResultDiagram3 != planResultDiagram2

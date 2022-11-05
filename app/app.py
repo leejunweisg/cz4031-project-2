@@ -128,57 +128,14 @@ def add_header(response):
 def example():
     # data to generate the graph
     graph_data = {
-        "plan1": {
+        "Plan 1": {
             "text": {"name": "I am the parent (plan 1)!"},
             "children": [
                 {"text": {"name": "I am the left child!"}},
                 {"text": {"name": "I am the right child!"}}
             ]
         },
-        "plan2": {
-            "children": [
-                {
-                    "children": [
-                        {
-                            "text": {
-                                "name": "Bitmap Index Scan region_pkey (r_regionkey = 1)"
-                            }
-                        }
-                    ],
-                    "text": {
-                        "name": "Bitmap Heap Scan region (r_regionkey = 1)"
-                    }
-                },
-                {
-                    "children": [
-                        {
-                            "text": {
-                                "name": "Seq Scan customer"
-                            }
-                        },
-                        {
-                            "children": [
-                                {
-                                    "text": {
-                                        "name": "Index Scan nation_pkey nation (n_regionkey = 1)"
-                                    }
-                                }
-                            ],
-                            "text": {
-                                "name": "Hash"
-                            }
-                        }
-                    ],
-                    "text": {
-                        "name": "Hash Join Inner (customer.c_nationkey = nation.n_nationkey)"
-                    }
-                }
-            ],
-            "text": {
-                "name": "Nested Loop Inner"
-            }
-        }
-
+        "plan2": {'text': {'name': 'Limit'}, 'children': [{'text': {'name': 'Index Scan customer_pkey customer'}}]},
     }
 
     # a dictionary of variables that we wish to pass to the template
@@ -205,34 +162,32 @@ def index():
         """ Process the query """
         print("Process the query")
         query = request.form['query']
-        print(query)
-
-        # Use getPlan function to get the jsonify
-        # {"QueryPlan1": planResult1[0][0][0],
-        # "QueryPlan2": planResult2[0][0][0],
-        # "QueryPlan3": planResult3[0][0][0],
-        # "planResultDiagram1": planResultDiagram1,
-        # "planResultDiagram2": planResultDiagram2,
-        # "planResultDiagram3": planResultDiagram3}
         queryResult = getPlan(query)
-        # return queryResult
-
-        # queryResult is an json object
 
         # a dictionary of variables that we wish to pass to the template
-        plan_data = [queryResult["QueryPlan1"],
-                     queryResult["QueryPlan2"], queryResult["QueryPlan3"]]
-        graph_data = {"Plan1": queryResult["planResultDiagram1"],
-                      "Plan2": queryResult["planResultDiagram2"],
-                      "Plan3": queryResult["planResultDiagram3"]}
+        plan_data = {
+            "Plan 1": queryResult["QueryPlan1"],
+            "Plan 2": queryResult["QueryPlan2"],
+            "Plan 3": queryResult["QueryPlan3"]
+        }
+        graph_data = {
+            "Plan 1": queryResult["planResultDiagram1"],
+            "Plan 2": queryResult["planResultDiagram2"],
+            "Plan 3": queryResult["planResultDiagram3"]
+        }
+        print(graph_data["Plan 1"])
+        # plan_data = [
+        #     queryResult["QueryPlan1"],
+        #     queryResult["QueryPlan2"],
+        #     queryResult["QueryPlan3"]
+        # ]
+        # graph_data = [
+        #     queryResult["planResultDiagram1"],
+        #     queryResult["planResultDiagram2"],
+        #     queryResult["planResultDiagram3"]
+        # ]
 
-        # print(plan_data[0]["execution_time"])
-        # print(plan_data[1]["execution_time"])
-        # print(plan_data[2]["execution_time"])
-        # return plan_data[0]
-        # plan_data[loop.index - 1]["execution_time"]
-
-        # render template
+        # print(graph_data[0])
         return render_template("index.html", query=query, plan_data=plan_data, graph_data=graph_data)
 
 

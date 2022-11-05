@@ -85,7 +85,6 @@
 			<!-- Display a table with attributes 'Execution Time', 'Planning Time', 'Total Cost'  -->
 			<h3>Table {{ plan }}</h3>
 			<table class="table table-striped">
-				<!-- <div id="graph-{{ loop.index }}" style="width: 100vw; height: 100vh"></div> -->
 				<thead>
 					<tr>
 						<th>Execution Time</th>
@@ -95,48 +94,82 @@
 				</thead>
 				<tbody>
 					<tr>
-						<td>{{ plan_data[loop.index-1]["Execution Time"] }}</td>
-						<td>{{ plan_data[loop.index-1]["Planning Time"] }}</td>
-						<td>{{ plan_data[loop.index-1]['Plan']["Total Cost"] }}</td>
+						<td>{{ plan_data[plan]["Execution Time"] }}</td>
+						<td>{{ plan_data[plan]["Planning Time"] }}</td>
+						<td>{{ plan_data[plan]['Plan']["Total Cost"] }}</td>
 					</tr>
 				</tbody>
 			</table>
+			<!-- Display a graph div with treantjs with height and width -->
 
+			<div id="graph-{{ loop.index }}" style="width: 100%; height: 100%"></div>
+			<!-- Generate a treantjs graph with graph_data -->
+			{% endif %}
 		</div>
-		{% endif %}
 		{% endfor %}
-</div>
 
-<script>
-	function openCity(evt, cityName) {
-		var i, tabcontent, tablinks;
-		tabcontent = document.getElementsByClassName("tabcontent");
-		for (i = 0; i < tabcontent.length; i++) {
-			tabcontent[i].style.display = "none";
-		}
-		tablinks = document.getElementsByClassName("tablinks");
-		for (i = 0; i < tablinks.length; i++) {
-			tablinks[i].className = tablinks[i].className.replace(" active", "");
-		}
-		document.getElementById(cityName).style.display = "block";
-		evt.currentTarget.className += " active";
-	}
-</script>
-</center>
-<div class="row">
-	<div class="blank100">
-		<!-- Blank Space -->
-	</div>
-</div>
-<div class="row footer">
-	<center>
-		CZ4031 AY22/S1 Group 48 | Github: https://github.com/leejunweisg/cz4031-project-2)
+		<!-- javascript -->
+		<script src="../static/vendor/jquery.min.js"></script>
+		<script src="../static/vendor/raphael.js"></script>
+		<script src="../static/vendor/treantjs/Treant.js"></script>
+		<script>
+			{% for plan in plans %}
+			var chart_config = {
+				chart: {
+					container: "#graph-{{ loop.index }}"
+				},
+				nodeStructure: {{ graph_data[plans[loop.index - 1]]| tojson | safe }}
+            };
+			var config = {
+				container: "#graph-{{ loop.index }}",
+				nodeAlign: "BOTTOM",
+				connectors: {
+					type: 'step'
+				},
+				node: {
+					collapsable: false
+				},
+				animation: {
+					nodeAnimation: "easeOutBounce",
+					nodeSpeed: 700,
+					connectorsAnimation: "bounce",
+					connectorsSpeed: 700
+				}
+			};
+
+			new Treant(chart_config, config)
+			{% endfor %}
+		</script>
+		<script>
+			function openCity(evt, cityName) {
+				var i, tabcontent, tablinks;
+				tabcontent = document.getElementsByClassName("tabcontent");
+				for (i = 0; i < tabcontent.length; i++) {
+					tabcontent[i].style.display = "none";
+				}
+				tablinks = document.getElementsByClassName("tablinks");
+				for (i = 0; i < tablinks.length; i++) {
+					tablinks[i].className = tablinks[i].className.replace(" active", "");
+				}
+				document.getElementById(cityName).style.display = "block";
+				evt.currentTarget.className += " active";
+			}
+		</script>
 	</center>
-</div>
-<div class="row">
-	<div class="blank">
-		<!-- Blank Space -->
+	<div class="row">
+		<div class="blank100">
+			<!-- Blank Space -->
+		</div>
 	</div>
-</div>
+	<div class="row footer">
+		<center>
+			CZ4031 AY22/S1 Group 48 | Github: https://github.com/leejunweisg/cz4031-project-2)
+		</center>
+	</div>
+	<div class="row">
+		<div class="blank">
+			<!-- Blank Space -->
+		</div>
+	</div>
 </div>
 {% endblock body %}

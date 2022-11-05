@@ -1,4 +1,3 @@
-
 import psycopg2
 from flask import Flask, jsonify, request, render_template
 
@@ -21,10 +20,13 @@ def getImptPlanDetails(queryPlan):
 
     # get all key:value pair with string value
     for attr, value in queryPlan.items():
-        if (isinstance(value, str)):
-            if (attr.find("Alias") == -1
-                & attr.find("Parent") == -1
-                    & attr.find("Direction") == -1):
+        if isinstance(value, str):
+            if (
+                attr.find("Alias")
+                == -1 & attr.find("Parent")
+                == -1 & attr.find("Direction")
+                == -1
+            ):
                 interResult["text"]["name"] += value + " "
 
     # remove last space from string
@@ -39,13 +41,10 @@ def getImptPlanDetails(queryPlan):
     if len(childrenDetails) != 0:
         interResult["children"] = childrenDetails
 
-    # dict(sorted(interResult.items(), key=lambda interResult: interResult[1]))
-
     return interResult
 
 
 def getAltQueryPlan(queryPlan, queryResult, cur):
-
     # Get all node type from Query Plan Result
     getAllNodeType(queryResult[0][0][0].get("Plan"))
 
@@ -57,7 +56,8 @@ def getAltQueryPlan(queryPlan, queryResult, cur):
 
     # Remove None from list
     filteredQueryConfigParamList = list(
-        filter(lambda x: x != None, queryConfigParamList))
+        filter(lambda x: x != None, queryConfigParamList)
+    )
 
     for item in filteredQueryConfigParamList:
         query = "SET LOCAL {} TO off;".format(item)
@@ -106,11 +106,13 @@ def queryPlanConfigParam(param):
 
 
 def get_db_connection():
-    conn = psycopg2.connect(host='localhost',
-                            database="TPC-H",
-                            user="postgres",
-                            password="password123",
-                            port="5432")
+    conn = psycopg2.connect(
+        host="localhost",
+        database="TPC-H",
+        user="postgres",
+        password="password123",
+        port="5432",
+    )
     return conn
 
 
@@ -128,112 +130,66 @@ def add_header(response):
 def example():
     # data to generate the graph
     graph_data = {
-        "plan1": {
+        "Plan 1": {
             "text": {"name": "I am the parent (plan 1)!"},
             "children": [
                 {"text": {"name": "I am the left child!"}},
-                {"text": {"name": "I am the right child!"}}
-            ]
+                {"text": {"name": "I am the right child!"}},
+            ],
         },
         "plan2": {
-            "children": [
-                {
-                    "children": [
-                        {
-                            "text": {
-                                "name": "Bitmap Index Scan region_pkey (r_regionkey = 1)"
-                            }
-                        }
-                    ],
-                    "text": {
-                        "name": "Bitmap Heap Scan region (r_regionkey = 1)"
-                    }
-                },
-                {
-                    "children": [
-                        {
-                            "text": {
-                                "name": "Seq Scan customer"
-                            }
-                        },
-                        {
-                            "children": [
-                                {
-                                    "text": {
-                                        "name": "Index Scan nation_pkey nation (n_regionkey = 1)"
-                                    }
-                                }
-                            ],
-                            "text": {
-                                "name": "Hash"
-                            }
-                        }
-                    ],
-                    "text": {
-                        "name": "Hash Join Inner (customer.c_nationkey = nation.n_nationkey)"
-                    }
-                }
-            ],
-            "text": {
-                "name": "Nested Loop Inner"
-            }
-        }
-
+            "text": {"name": "Limit"},
+            "children": [{"text": {"name": "Index Scan customer_pkey customer"}}],
+        },
     }
 
     # a dictionary of variables that we wish to pass to the template
-    context = {
-        "graph_data": graph_data
-    }
+    context = {"graph_data": graph_data}
 
     # render template
     return render_template("example.html", **context)
 
+
 # ============================================================================================
 
 
-@app.route("/", methods=['GET', 'POST'])
+@app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == 'GET':
-        """ Renders the home page """
+    if request.method == "GET":
+        """Renders the home page"""
         print("Renders the home page")
         return render_template(
             "index.html",
             query="",
         )
     else:
-        """ Process the query """
+        """Process the query"""
         print("Process the query")
-        query = request.form['query']
+        query = request.form["query"]
         print(query)
-
-        # Use getPlan function to get the jsonify
-        # {"QueryPlan1": planResult1[0][0][0],
-        # "QueryPlan2": planResult2[0][0][0],
-        # "QueryPlan3": planResult3[0][0][0],
-        # "planResultDiagram1": planResultDiagram1,
-        # "planResultDiagram2": planResultDiagram2,
-        # "planResultDiagram3": planResultDiagram3}
         queryResult = getPlan(query)
-        # return queryResult
 
-        # queryResult is an json object
-
-        # a dictionary of variables that we wish to pass to the template
-        plan_data = [queryResult["QueryPlan1"],
-                     queryResult["QueryPlan2"], queryResult["QueryPlan3"]]
-        graph_data = {"Plan1": queryResult["planResultDiagram1"],
-                      "Plan2": queryResult["planResultDiagram2"],
-                      "Plan3": queryResult["planResultDiagram3"]}
-
-        # print(plan_data[0]["execution_time"])
-        # print(plan_data[1]["execution_time"])
-        # print(plan_data[2]["execution_time"])
-        # return plan_data[0]
-        # plan_data[loop.index - 1]["execution_time"]
-
-        # render template
-        return render_template("index.html", query=query, plan_data=plan_data, graph_data=graph_data)
+        if queryResult == "Invalid Query Input":
+            return render_template(
+                "index.html",
+                plan_data={
+                    "Plan 1": {},
+                    "Plan 2": {},
+                    "Plan 3": {},
+                },
+                graph_data={
+                    "Plan 1": {},
+                    "Plan 2": {},
+                    "Plan 3": {},
+                },
+            )
+        else:
+            return render_template(
+                "index.html",
+                query=query,
+                plan_data=queryResult["plan_data"],
+                graph_data=queryResult["graph_data"],
+            )
 
 
 def getPlan(queryInput):
@@ -241,30 +197,114 @@ def getPlan(queryInput):
 
     queryPlan = """
     EXPLAIN (ANALYZE true, SETTINGS true, FORMAT JSON) {};
-    """.format(queryInput)
+    """.format(
+        queryInput
+    )
 
-    cur.execute(queryPlan)
-    planResult1 = cur.fetchall()
+    result = {
+        "plan_data": {"Plan 1": {}, "Plan 2": {}, "Plan 3": {}},
+        "graph_data": {"Plan 1": {}, "Plan 2": {}, "Plan 3": {}},
+    }
 
-    planResult2 = getAltQueryPlan(queryPlan, planResult1, cur)
+    try:
+        cur.execute(queryPlan)
+        planResult1 = cur.fetchall()
 
-    planResult3 = getAltQueryPlan(queryPlan, planResult2, cur)
+        planResult2 = getAltQueryPlan(queryPlan, planResult1, cur)
 
-    planResultDiagram1 = getImptPlanDetails(planResult1[0][0][0].get("Plan"))
+        planResult3 = getAltQueryPlan(queryPlan, planResult2, cur)
 
-    planResultDiagram2 = getImptPlanDetails(planResult2[0][0][0].get("Plan"))
+        planResultDiagram1 = getImptPlanDetails(planResult1[0][0][0].get("Plan"))
 
-    planResultDiagram3 = getImptPlanDetails(planResult3[0][0][0].get("Plan"))
+        planResultDiagram2 = getImptPlanDetails(planResult2[0][0][0].get("Plan"))
 
-    cur.close()
+        planResultDiagram3 = getImptPlanDetails(planResult3[0][0][0].get("Plan"))
 
-    return {"QueryPlan1": planResult1[0][0][0],
-            "QueryPlan2": planResult2[0][0][0],
-            "QueryPlan3": planResult3[0][0][0],
-            "planResultDiagram1": planResultDiagram1,
-            "planResultDiagram2": planResultDiagram2,
-            "planResultDiagram3": planResultDiagram3}
+        print(planResultDiagram1 == planResultDiagram2)
+
+        result["plan_data"]["Plan 1"] = planResult1[0][0][0]
+        result["graph_data"]["Plan 1"] = planResultDiagram1
+
+        # check if there are repeated query plans
+        if planResultDiagram2 != planResultDiagram1:
+            result["plan_data"]["Plan 2"] = planResult2[0][0][0]
+            result["graph_data"]["Plan 2"] = planResultDiagram2
+
+        if (
+            planResultDiagram3 != planResultDiagram1
+            and planResultDiagram3 != planResultDiagram2
+        ):
+            result["plan_data"]["Plan 3"] = planResult3[0][0][0]
+            result["graph_data"]["Plan 3"] = planResultDiagram3
+
+        cur.close()
+    except:
+        # rollback when theres error
+        conn.rollback()
+        cur.close()
+        return "Invalid Query Input"
+
+    return result
 
 
-if __name__ == '__main__':
+@app.route("/testGetPlan", methods=["POST"])
+def testGetPlan():
+    cur = conn.cursor()
+    data = request.get_json()
+
+    queryInput = data["queryInput"]
+
+    queryPlan = """
+    EXPLAIN (ANALYZE true, SETTINGS true, FORMAT JSON) {};
+    """.format(
+        queryInput
+    )
+
+    result = {
+        "plan_data": {"Plan 1": {}, "Plan 2": {}, "Plan 3": {}},
+        "graph_data": {"Plan 1": {}, "Plan 2": {}, "Plan 3": {}},
+    }
+
+    try:
+        cur.execute(queryPlan)
+        planResult1 = cur.fetchall()
+
+        planResult2 = getAltQueryPlan(queryPlan, planResult1, cur)
+
+        planResult3 = getAltQueryPlan(queryPlan, planResult2, cur)
+
+        planResultDiagram1 = getImptPlanDetails(planResult1[0][0][0].get("Plan"))
+
+        planResultDiagram2 = getImptPlanDetails(planResult2[0][0][0].get("Plan"))
+
+        planResultDiagram3 = getImptPlanDetails(planResult3[0][0][0].get("Plan"))
+
+        print(planResultDiagram1 == planResultDiagram2)
+
+        result["plan_data"]["Plan 1"] = planResult1[0][0][0]
+        result["graph_data"]["Plan 1"] = planResultDiagram1
+
+        # check if there are repeated query plans
+        if planResultDiagram2 != planResultDiagram1:
+            result["plan_data"]["Plan 2"] = planResult2[0][0][0]
+            result["graph_data"]["Plan 2"] = planResultDiagram2
+
+        if (
+            planResultDiagram3 != planResultDiagram1
+            and planResultDiagram3 != planResultDiagram2
+        ):
+            result["plan_data"]["Plan 3"] = planResult3[0][0][0]
+            result["graph_data"]["Plan 3"] = planResultDiagram3
+
+        cur.close()
+    except:
+        # rollback when theres error
+        conn.rollback()
+        cur.close()
+        return "Error", 400
+
+    return jsonify(result)
+
+
+if __name__ == "__main__":
     app.run(port=5001, debug=True)

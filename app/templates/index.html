@@ -109,7 +109,7 @@
                 <h3 class="card-title font-weight-bold">Results</h3>
                 <ul class="nav nav-tabs nav-tabs-primary" role="tablist">
                   <!-- Tab-buttons for each plan -->
-                  {% for plans in plan_data %}
+                  {% for plan in plan_data %}
                     <li class="nav-item">
                       <a class="nav-link{% if loop.index==1 %} active show{% endif %}" data-toggle="tab"
                          href="#plan{{ loop.index }}"
@@ -185,7 +185,7 @@
   </div>
 
   <!-- Graph Modal -->
-  <div class="modal fade " id="graphModal" tabindex="-1" role="dialog" aria-labelledby="graphModalTitle"
+  <div class="modal fade" id="graphModal" tabindex="-1" role="dialog" aria-labelledby="graphModalTitle"
        aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
@@ -196,7 +196,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <div id="chartdiv" style="height:500px;"></div>
+          <div id="chartdiv"></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -255,15 +255,11 @@
       });
 
       series.nodes.template.setAll({
-          "tooltipText": "[bold]{Node Type} {Join Type}[/]\n{Hash Cond}{Sort Key}\n[bold]Cost:[/] {Total Cost}"
+          tooltipText: "[bold]{Node Type} {Join Type}[/]\n{Hash Cond}{Sort Key}\n[bold]Cost:[/] {Total Cost}"
       });
-
-      series.data.setAll([data[0]]);
-      series.set("selectedDataItem", series.dataItems[0]);
 
       const showGraph = (idx) => {
           series.data.setAll([data[idx]]);
-          series.set("selectedDataItem", series.dataItems[0]);
           $('#graphModal').modal('show');
       }
 

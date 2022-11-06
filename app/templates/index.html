@@ -16,7 +16,7 @@
     <h1 class="title mb-5">AQP Visualiser</h1>
 
     <div class="row">
-      <div class="col-lg-6">
+      <div class="col-lg-12">
         <div class="card">
           <div class="card-body">
             <h3 class="card-title font-weight-bold">Query</h3>
@@ -38,142 +38,164 @@
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Select an example query
               </button>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <!-- <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'SELECT * FROM public.customer ORDER BY c_custkey ASC LIMIT 10;'">Query 0</a> -->
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'select l_returnflag, l_linestatus, sum(l_quantity) as sum_qty, sum(l_extendedprice) as sum_base_price, sum(l_extendedprice * (1 - l_discount)) as sum_disc_price, sum(l_extendedprice * (1 - l_discount) * (1 + l_tax)) as sum_charge, avg(l_quantity) as avg_qty, avg(l_extendedprice) as avg_price, avg(l_discount) as avg_disc, count(*) as count_order from lineitem where l_extendedprice > 100 group by l_returnflag, l_linestatus order by l_returnflag, l_linestatus;'">Query 1</a>
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'select l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority from customer, orders, lineitem where c_mktsegment = \'BUILDING\' and c_custkey = o_custkey and l_orderkey = o_orderkey and o_totalprice > 10 and l_extendedprice > 10 group by l_orderkey, o_orderdate, o_shippriority order by revenue desc, o_orderdate;'">Query 2</a>
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'select o_orderpriority, count(*) as order_count from orders where o_totalprice > 100 and exists ( select * from lineitem where l_orderkey = o_orderkey and l_extendedprice > 100 ) group by o_orderpriority order by o_orderpriority;'">Query 3</a>
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'select n_name, sum(l_extendedprice * (1 - l_discount)) as revenue from customer, orders, lineitem, supplier, nation, region where c_custkey = o_custkey and l_orderkey = o_orderkey and l_suppkey = s_suppkey and c_nationkey = s_nationkey and s_nationkey = n_nationkey and n_regionkey = r_regionkey and r_name = \'ASIA\' and o_orderdate >= \'1994-01-01\' and o_orderdate < \'1995-01-01\' and c_acctbal > 10 and s_acctbal > 20 group by n_name order by revenue desc;'">Query 4</a>
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'select sum(l_extendedprice * l_discount) as revenue from lineitem where l_extendedprice > 100;'">Query 5</a>
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'select supp_nation, cust_nation, l_year, sum(volume) as revenue from ( select n1.n_name as supp_nation, n2.n_name as cust_nation, DATE_PART(\'YEAR\',l_shipdate) as l_year, l_extendedprice * (1 - l_discount) as volume from supplier, lineitem, orders, customer, nation n1, nation n2 where s_suppkey = l_suppkey and o_orderkey = l_orderkey and c_custkey = o_custkey and s_nationkey = n1.n_nationkey and c_nationkey = n2.n_nationkey and ( (n1.n_name = \'FRANCE\' and n2.n_name = \'GERMANY\') or (n1.n_name = \'GERMANY\' and n2.n_name = \'FRANCE\') ) and l_shipdate between \'1995-01-01\' and \'1996-12-31\' and o_totalprice > 100 and c_acctbal > 10 ) as shipping group by supp_nation, cust_nation, l_year order by supp_nation, cust_nation, l_year;'">Query 6</a>
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'select o_year, sum(case when nation = \'BRAZIL\' then volume else 0 end) / sum(volume) as mkt_share from ( select DATE_PART(\'YEAR\',o_orderdate) as o_year, l_extendedprice * (1 - l_discount) as volume, n2.n_name as nation from part, supplier, lineitem, orders, customer, nation n1, nation n2, region where p_partkey = l_partkey and s_suppkey = l_suppkey and l_orderkey = o_orderkey and o_custkey = c_custkey and c_nationkey = n1.n_nationkey and n1.n_regionkey = r_regionkey and r_name = \'AMERICA\' and s_nationkey = n2.n_nationkey and o_orderdate between \'1995-01-01\' and \'1996-12-31\' and p_type = \'ECONOMY ANODIZED STEEL\' and s_acctbal > 10 and l_extendedprice > 100 ) as all_nations group by o_year order by o_year;'">Query 7</a>
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'select n_name, o_year, sum(amount) as sum_profit from ( select n_name, DATE_PART(\'YEAR\',o_orderdate) as o_year, l_extendedprice * (1 - l_discount) - ps_supplycost * l_quantity as amount from part, supplier, lineitem, partsupp, orders, nation where s_suppkey = l_suppkey and ps_suppkey = l_suppkey and ps_partkey = l_partkey and p_partkey = l_partkey and o_orderkey = l_orderkey and s_nationkey = n_nationkey and p_name like \'%green%\' and s_acctbal > 10 and ps_supplycost > 100 ) as profit group by n_name, o_year order by n_name, o_year desc;'">Query 8</a>
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'select c_custkey, c_name, sum(l_extendedprice * (1 - l_discount)) as revenue, c_acctbal, n_name, c_address, c_phone, c_comment from customer, orders, lineitem, nation where c_custkey = o_custkey and l_orderkey = o_orderkey and o_orderdate >= \'1993-10-01\' and o_orderdate < \'1994-01-01\' and c_nationkey = n_nationkey and c_acctbal > 10 and l_extendedprice > 100 group by c_custkey, c_name, c_acctbal, c_phone, n_name, c_address, c_comment order by revenue desc;'">Query 9</a>
-                    <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'select ps_partkey, sum(ps_supplycost * ps_availqty) as value from partsupp, supplier, nation where ps_suppkey = s_suppkey and s_nationkey = n_nationkey and n_name = \'GERMANY\' and ps_supplycost > 20 and s_acctbal > 10 group by ps_partkey having sum(ps_supplycost * ps_availqty) > ( select sum(ps_supplycost * ps_availqty) * 0.0001000000 from partsupp, supplier, nation where ps_suppkey = s_suppkey and s_nationkey = n_nationkey and n_name = \'GERMANY\' ) order by value desc;'">Query 10</a>
-                  </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-        <div class="col-lg-6">
-          <div class="card">
-            <div class="card-body">
-              <h3 class="card-title font-weight-bold">Results</h3>
-              <ul class="nav nav-tabs nav-tabs-primary" role="tablist">
-                <!-- Tab-buttons for each plan -->
-                {% for idx in range(1, 4) %}
-                <li class="nav-item">
-                  <a class="nav-link{% if idx==1 %} active show{% endif %}" data-toggle="tab" href="#plan{{ idx }}"
-                    role="tablist">
-                    Plan {{ idx }}
-                  </a>
-                </li>
-                {% endfor %}
-
-              </ul>
-              <div class="tab-content tab-space pb-2">
-                <!-- if not query -->
-                {% if not query %}
-                <div class="tab-pane active show" id="plan1" role="tabpanel">
-                  <p class="text-muted">No query entered.</p>
-                  {% else %}
-                  <!-- Tab-panes for each plan -->
-                  {% for idx in range(1, 4) %}
-                  <!-- Plan {{ idx }} -->
-                  <div class="tab-pane{% if idx==1 %} active show{% endif %}" id="plan{{ idx }}">
-
-                    <!-- Metrics row -->
-                    <div class="row">
-                      <div class="col-md-12">
-                        <h4>Metrics</h4>
-                      </div>
-                      <div class="col-md-4">
-                        <h5 class="font-weight-bold mb-1">Execution Time (ms)</h5>
-                        <p>{{ plan_data["Plan {}".format(idx)]["Execution Time"] }}</p>
-                      </div>
-                      <div class="col-md-4">
-                        <h5 class="font-weight-bold mb-1">Planning Time (ms)</h5>
-                        <p>{{ plan_data["Plan {}".format(idx)]["Planning Time"] }}</p>
-                      </div>
-                      <div class="col-md-4">
-                        <h5 class="font-weight-bold mb-1">Total Cost</h5>
-                        {%if plan_data["Plan {}".format(idx)] == {} %}
-                        <p></p>
-                        {% else %}
-                        <p>{{ plan_data["Plan {}".format(idx)]["Plan"]["Total Cost"] }}</p>
-                        {% endif %}
-                      </div>
-                    </div>
-
-                    <!-- Description row -->
-                    <div class="row mt-3">
-                      <div class="col-md-12">
-                        <h4>Description</h4>
-                        <p>
-                          First, a join is done on the xxx table and bla bla black sheep I don't
-                          know what else to
-                          write.
-                          Next, a index scan is performed on the. First, a join is done on the xxx
-                          table and bla bla
-                          black
-                          sheep I don't know what else to write.
-                          Next, a index scan is performed on the.
-                        </p>
-                      </div>
-                    </div>
-
-                    <!-- Graph row -->
-                    <div class="row mt-3">
-                      <div class="col-md-12">
-                        <h4>Graph</h4>
-                        <!-- set the style of background color be pink -->
-
-                        <div id="graph-{{ idx }}"></div>
-                        <!-- Disable button if there is no query input-->
-                        {% if not query %}
-                        <button class="btn btn-sm btn-info" disabled>Display graph</button>
-                        {% else %}
-                        <button class="btn btn-sm btn-info"
-                          onclick="generateGraph(this, {{ idx }}, {{ graph_data['Plan {}'.format(idx)] }})">
-                          Display graph
-                        </button>
-                        {% endif %}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  {% endfor %}
-
-                </div>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <!-- <a class="dropdown-item" href="#" onclick="document.getElementById('id-query').value = 'SELECT * FROM public.customer ORDER BY c_custkey ASC LIMIT 10;'">Query 0</a> -->
+                <a class="dropdown-item" href="#"
+                  onclick="document.getElementById('id-query').value = 'select l_returnflag, l_linestatus, sum(l_quantity) as sum_qty, sum(l_extendedprice) as sum_base_price, sum(l_extendedprice * (1 - l_discount)) as sum_disc_price, sum(l_extendedprice * (1 - l_discount) * (1 + l_tax)) as sum_charge, avg(l_quantity) as avg_qty, avg(l_extendedprice) as avg_price, avg(l_discount) as avg_disc, count(*) as count_order from lineitem where l_extendedprice > 100 group by l_returnflag, l_linestatus order by l_returnflag, l_linestatus;'">Query
+                  1</a>
+                <a class="dropdown-item" href="#"
+                  onclick="document.getElementById('id-query').value = 'select l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority from customer, orders, lineitem where c_mktsegment = \'BUILDING\' and c_custkey = o_custkey and l_orderkey = o_orderkey and o_totalprice > 10 and l_extendedprice > 10 group by l_orderkey, o_orderdate, o_shippriority order by revenue desc, o_orderdate;'">Query
+                  2</a>
+                <a class="dropdown-item" href="#"
+                  onclick="document.getElementById('id-query').value = 'select o_orderpriority, count(*) as order_count from orders where o_totalprice > 100 and exists ( select * from lineitem where l_orderkey = o_orderkey and l_extendedprice > 100 ) group by o_orderpriority order by o_orderpriority;'">Query
+                  3</a>
+                <a class="dropdown-item" href="#"
+                  onclick="document.getElementById('id-query').value = 'select n_name, sum(l_extendedprice * (1 - l_discount)) as revenue from customer, orders, lineitem, supplier, nation, region where c_custkey = o_custkey and l_orderkey = o_orderkey and l_suppkey = s_suppkey and c_nationkey = s_nationkey and s_nationkey = n_nationkey and n_regionkey = r_regionkey and r_name = \'ASIA\' and o_orderdate >= \'1994-01-01\' and o_orderdate < \'1995-01-01\' and c_acctbal > 10 and s_acctbal > 20 group by n_name order by revenue desc;'">Query
+                  4</a>
+                <a class="dropdown-item" href="#"
+                  onclick="document.getElementById('id-query').value = 'select sum(l_extendedprice * l_discount) as revenue from lineitem where l_extendedprice > 100;'">Query
+                  5</a>
+                <a class="dropdown-item" href="#"
+                  onclick="document.getElementById('id-query').value = 'select supp_nation, cust_nation, l_year, sum(volume) as revenue from ( select n1.n_name as supp_nation, n2.n_name as cust_nation, DATE_PART(\'YEAR\',l_shipdate) as l_year, l_extendedprice * (1 - l_discount) as volume from supplier, lineitem, orders, customer, nation n1, nation n2 where s_suppkey = l_suppkey and o_orderkey = l_orderkey and c_custkey = o_custkey and s_nationkey = n1.n_nationkey and c_nationkey = n2.n_nationkey and ( (n1.n_name = \'FRANCE\' and n2.n_name = \'GERMANY\') or (n1.n_name = \'GERMANY\' and n2.n_name = \'FRANCE\') ) and l_shipdate between \'1995-01-01\' and \'1996-12-31\' and o_totalprice > 100 and c_acctbal > 10 ) as shipping group by supp_nation, cust_nation, l_year order by supp_nation, cust_nation, l_year;'">Query
+                  6</a>
+                <a class="dropdown-item" href="#"
+                  onclick="document.getElementById('id-query').value = 'select o_year, sum(case when nation = \'BRAZIL\' then volume else 0 end) / sum(volume) as mkt_share from ( select DATE_PART(\'YEAR\',o_orderdate) as o_year, l_extendedprice * (1 - l_discount) as volume, n2.n_name as nation from part, supplier, lineitem, orders, customer, nation n1, nation n2, region where p_partkey = l_partkey and s_suppkey = l_suppkey and l_orderkey = o_orderkey and o_custkey = c_custkey and c_nationkey = n1.n_nationkey and n1.n_regionkey = r_regionkey and r_name = \'AMERICA\' and s_nationkey = n2.n_nationkey and o_orderdate between \'1995-01-01\' and \'1996-12-31\' and p_type = \'ECONOMY ANODIZED STEEL\' and s_acctbal > 10 and l_extendedprice > 100 ) as all_nations group by o_year order by o_year;'">Query
+                  7</a>
+                <a class="dropdown-item" href="#"
+                  onclick="document.getElementById('id-query').value = 'select n_name, o_year, sum(amount) as sum_profit from ( select n_name, DATE_PART(\'YEAR\',o_orderdate) as o_year, l_extendedprice * (1 - l_discount) - ps_supplycost * l_quantity as amount from part, supplier, lineitem, partsupp, orders, nation where s_suppkey = l_suppkey and ps_suppkey = l_suppkey and ps_partkey = l_partkey and p_partkey = l_partkey and o_orderkey = l_orderkey and s_nationkey = n_nationkey and p_name like \'%green%\' and s_acctbal > 10 and ps_supplycost > 100 ) as profit group by n_name, o_year order by n_name, o_year desc;'">Query
+                  8</a>
+                <a class="dropdown-item" href="#"
+                  onclick="document.getElementById('id-query').value = 'select c_custkey, c_name, sum(l_extendedprice * (1 - l_discount)) as revenue, c_acctbal, n_name, c_address, c_phone, c_comment from customer, orders, lineitem, nation where c_custkey = o_custkey and l_orderkey = o_orderkey and o_orderdate >= \'1993-10-01\' and o_orderdate < \'1994-01-01\' and c_nationkey = n_nationkey and c_acctbal > 10 and l_extendedprice > 100 group by c_custkey, c_name, c_acctbal, c_phone, n_name, c_address, c_comment order by revenue desc;'">Query
+                  9</a>
+                <a class="dropdown-item" href="#"
+                  onclick="document.getElementById('id-query').value = 'select ps_partkey, sum(ps_supplycost * ps_availqty) as value from partsupp, supplier, nation where ps_suppkey = s_suppkey and s_nationkey = n_nationkey and n_name = \'GERMANY\' and ps_supplycost > 20 and s_acctbal > 10 group by ps_partkey having sum(ps_supplycost * ps_availqty) > ( select sum(ps_supplycost * ps_availqty) * 0.0001000000 from partsupp, supplier, nation where ps_suppkey = s_suppkey and s_nationkey = n_nationkey and n_name = \'GERMANY\' ) order by value desc;'">Query
+                  10</a>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title font-weight-bold">Results</h3>
+            <ul class="nav nav-tabs nav-tabs-primary" role="tablist">
+              <!-- Tab-buttons for each plan -->
+              {% for idx in range(1, 4) %}
+              <li class="nav-item">
+                <a class="nav-link{% if idx==1 %} active show{% endif %}" data-toggle="tab" href="#plan{{ idx }}"
+                  role="tablist">
+                  Plan {{ idx }}
+                </a>
+              </li>
+              {% endfor %}
 
+            </ul>
+            <div class="tab-content tab-space pb-2">
+              <!-- if not query -->
+              {% if not query %}
+              <div class="tab-pane active show" id="plan1" role="tabpanel">
+                <p class="text-muted">No query entered.</p>
+                {% else %}
+                <!-- Tab-panes for each plan -->
+                {% for idx in range(1, 4) %}
+                <!-- Plan {{ idx }} -->
+                <div class="tab-pane{% if idx==1 %} active show{% endif %}" id="plan{{ idx }}">
+
+                  <!-- Metrics row -->
+                  <div class="row">
+                    <div class="col-md-12">
+                      <h4>Metrics</h4>
+                    </div>
+                    <div class="col-md-4">
+                      <h5 class="font-weight-bold mb-1">Execution Time (ms)</h5>
+                      <p>{{ plan_data["Plan {}".format(idx)]["Execution Time"] }}</p>
+                    </div>
+                    <div class="col-md-4">
+                      <h5 class="font-weight-bold mb-1">Planning Time (ms)</h5>
+                      <p>{{ plan_data["Plan {}".format(idx)]["Planning Time"] }}</p>
+                    </div>
+                    <div class="col-md-4">
+                      <h5 class="font-weight-bold mb-1">Total Cost</h5>
+                      {%if plan_data["Plan {}".format(idx)] == {} %}
+                      <p></p>
+                      {% else %}
+                      <p>{{ plan_data["Plan {}".format(idx)]["Plan"]["Total Cost"] }}</p>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <!-- Description row -->
+                  <div class="row mt-3">
+                    <div class="col-md-12">
+                      <h4>Description</h4>
+                      <p>
+                        First, a join is done on the xxx table and bla bla black sheep I don't
+                        know what else to
+                        write.
+                        Next, a index scan is performed on the. First, a join is done on the xxx
+                        table and bla bla
+                        black
+                        sheep I don't know what else to write.
+                        Next, a index scan is performed on the.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Graph row -->
+                  <div class="row mt-3">
+                    <div class="col-md-12">
+                      <h4>Graph</h4>
+                      <!-- set the style of background color be pink -->
+
+                      <div id="graph-{{ idx }}"></div>
+                      <!-- Disable button if there is no query input-->
+                      {% if not query %}
+                      <button class="btn btn-sm btn-info" disabled>Display graph</button>
+                      {% else %}
+                      <button class="btn btn-sm btn-info"
+                        onclick="generateGraph(this, {{ idx }}, {{ graph_data['Plan {}'.format(idx)] }})">
+                        Display graph
+                      </button>
+                      {% endif %}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
+
     </div>
-    {% endif %}
-
-    {% endblock body %}
-
-    {% block js %}
-    <script src="../static/js/plugins/raphael.js"></script>
-    <script src="../static/js/plugins/Treant.js"></script>
-    <script>
-      const generateGraph = (btn, idx, graph) => {
-        btn.style.display = 'none';
-        var chart_config = {
-          chart: {
-            container: "#graph-" + idx,
-          },
-          nodeStructure: graph
-        }
-        Treant(chart_config);
-
-      }
-    </script>
-    {% endblock js %}
-
   </div>
+</div>
+{% endif %}
+
+{% endblock body %}
+
+{% block js %}
+<script src="../static/js/plugins/raphael.js"></script>
+<script src="../static/js/plugins/Treant.js"></script>
+<script>
+  const generateGraph = (btn, idx, graph) => {
+    btn.style.display = 'none';
+    var chart_config = {
+      chart: {
+        container: "#graph-" + idx,
+      },
+      nodeStructure: graph
+    }
+    Treant(chart_config);
+
+  }
+</script>
+{% endblock js %}
+
+</div>

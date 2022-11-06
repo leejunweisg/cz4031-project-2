@@ -1,3 +1,6 @@
 .idea/
 app/env/
+app/Pipfile*
 database/database-dump.sql
+database/*.csv
+__pycache__

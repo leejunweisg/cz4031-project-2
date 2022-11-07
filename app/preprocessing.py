@@ -4,6 +4,7 @@ import psycopg2
 from psycopg2 import ProgrammingError
 
 from annotation import get_plan_summary, get_graph_data
+from explain import explain
 
 # mapping of node type to runtime setting name
 params_map = {
@@ -17,7 +18,7 @@ params_map = {
     "Nested Loop": "enable_nestloop",
     "Seq Scan": "enable_seqscan",
     "Sort": "enable_sort",
-    "Tid Scan": "enable_tidscan"
+    "Tid Scan": "enable_tidscan",
 }
 
 
@@ -26,6 +27,7 @@ class DatabaseConnection:
     Database connection singleton class.
     Call get_conn() to get a database connection.
     """
+
     _conn = None
 
     @classmethod
@@ -59,6 +61,23 @@ def get_node_types(plan):
     return types
 
 
+def getNaturalExplanation(query_plan):
+    naturalExplanation = []
+
+    # queue for bfs
+    q = deque([query_plan])
+    while q:
+        n = len(q)
+        for _ in range(n):
+            node = q.popleft()
+            naturalExplanation.append(explain(node))
+            if "Plans" in node:
+                for child in node["Plans"]:
+                    q.append(child)
+
+    return naturalExplanation[::-1]
+
+
 def get_plans(user_query):
     """
     Get query plans for the given user query.
@@ -76,6 +95,7 @@ def get_plans(user_query):
         "plan_data": [],
         "graph_data": [],
         "summary_data": [],
+        "natural_explain": [],
     }
 
     try:
@@ -107,22 +127,30 @@ def get_plans(user_query):
         diagram2 = get_graph_data(plan2)
         diagram3 = get_graph_data(plan3)
 
+        # get natural explanation
+        naturalExplain1 = getNaturalExplanation(plan1)
+        naturalExplain2 = getNaturalExplanation(plan2)
+        naturalExplain3 = getNaturalExplanation(plan3)
+
         # add plan 1 results to result object
         result["plan_data"].append(plan1)
         result["graph_data"].append(diagram1)
         result["summary_data"].append(summary1)
+        result["natural_explain"].append(naturalExplain1)
 
         # check if plan2 is the same as plan1
         if diagram2 != diagram1:
             result["plan_data"].append(plan2)
             result["graph_data"].append(diagram2)
             result["summary_data"].append(summary2)
+            result["natural_explain"].append(naturalExplain2)
 
         # check if plan3 is the same as plan1 or plan2
         if diagram3 != diagram1 and diagram3 != diagram2:
             result["plan_data"].append(plan3)
             result["graph_data"].append(diagram3)
             result["summary_data"].append(summary3)
+            result["natural_explain"].append(naturalExplain3)
 
     except Exception as e:
         return True, {"msg": f"An error has occurred: {str(e)}"}

@@ -63,7 +63,7 @@ def get_node_types(plan):
 
 def getNaturalExplanation(query_plan):
     naturalExplanation = []
-    # naturalExplanation = ""
+
     # queue for bfs
     q = deque([query_plan])
     while q:
@@ -71,7 +71,6 @@ def getNaturalExplanation(query_plan):
         for _ in range(n):
             node = q.popleft()
             naturalExplanation.append(explain(node))
-            # naturalExplanation += explain(node) + "\r"
             if "Plans" in node:
                 for child in node["Plans"]:
                     q.append(child)

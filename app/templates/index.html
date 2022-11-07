@@ -210,7 +210,7 @@
                     <h4 class="font-weight-bold mb-1">Description</h4>
                     <ol>
                       {% for line in natural_explain[loop.index0] %}
-                      <li>{{ line }}</li>
+                      <li>{{ line|safe }}</li>
                       {% endfor %}
                     </ol>
                   </div>

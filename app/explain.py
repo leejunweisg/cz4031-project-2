@@ -5,24 +5,24 @@ def bold_string(string):
     return bold["START"] + string + bold["END"]
 
 
-def aggregate_explain(query_plan):
-    strategy = query_plan["Strategy"]
+def aggregate_natural_explain(plan):
+    strategy = plan["Strategy"]
     if strategy == "Sorted":
         result = f"{bold_string('Aggregate')} operation is perfomed on the rows based on their keys."
-        if "Group Key" in query_plan:
+        if "Group Key" in plan:
             result += f" The {bold_string('aggregated')} key(s) are: "
-            for key in query_plan["Group Key"]:
+            for key in plan["Group Key"]:
                 result += bold_string(key) + ","
             result = result[:-1] + "."
-        if "Filter" in query_plan:
+        if "Filter" in plan:
             result += " The rows are also filtered by " + bold_string(
-                query_plan["Filter"].replace("::text", "")
+                plan["Filter"].replace("::text", "")
             )
             result += "."
         return result
     elif strategy == "Hashed":
         result = f"{bold_string('Aggregate')} operation is performed by hashing on all rows based on the following key(s): "
-        for key in query_plan["Group Key"]:
+        for key in plan["Group Key"]:
             result += bold_string(key.replace("::text", "")) + ", "
         result += f"then the results are {bold_string('aggregated')} into bucket(s) accordung to the hashed key."
         return result
@@ -34,113 +34,113 @@ def aggregate_explain(query_plan):
         return "Aggregation is performed."
 
 
-def append_explain():
+def append_natural_explain():
     result = f"{bold_string('Append')} operation is performed with multiple sub-operations. All the rows that are returned as one set as the result."
     return result
 
 
-def cte_explain(query_plan):
+def cte_natural_explain(plan):
     result = (
         f"A {bold_string('CTE scan')} operation is performed on the table "
-        + bold_string(str(query_plan["CTE Name"]))
+        + bold_string(str(plan["CTE Name"]))
         + " which is stored in memory "
     )
-    if "Index Cond" in query_plan:
+    if "Index Cond" in plan:
         result += " with the condition(s) " + bold_string(
-            query_plan["Index Cond"].replace("::text", "")
+            plan["Index Cond"].replace("::text", "")
         )
-    if "Filter" in query_plan:
+    if "Filter" in plan:
         result += " the result is then filtered by " + bold_string(
-            query_plan["Filter"].replace("::text", "")
+            plan["Filter"].replace("::text", "")
         )
     result += "."
     return result
 
 
-def function_scan_explain(query_plan):
+def function_scan_natural_explain(plan):
     return "The function {} is run and returns all the recordset(s) that it created.".format(
-        bold_string(query_plan["Function Name"])
+        bold_string(plan["Function Name"])
     )
 
 
-def group_explain(query_plan):
+def group_natural_explain(plan):
     result = f"The result from the previous operation is {bold_string('grouped')} by the following key(s): "
-    for i, key in enumerate(query_plan["Group Key"]):
+    for i, key in enumerate(plan["Group Key"]):
         result += bold_string(key.replace("::text", ""))
-        if i == len(query_plan["Group Key"]) - 1:
+        if i == len(plan["Group Key"]) - 1:
             result += "."
         else:
             result += ", "
     return result
 
 
-def index_scan_explain(query_plan):
+def index_scan_natural_explain(plan):
     result = ""
     result += (
         f"{bold_string('Index Scan')} operation is performed using "
-        + bold_string(query_plan["Index Name"])
+        + bold_string(plan["Index Name"])
         + " index table "
     )
-    if "Index Cond" in query_plan:
+    if "Index Cond" in plan:
         result += " with the following condition(s): " + bold_string(
-            query_plan["Index Cond"].replace("::text", "")
+            plan["Index Cond"].replace("::text", "")
         )
     result += ", and the {} table and fetches rows that matches the conditions.".format(
-        bold_string(query_plan["Relation Name"])
+        bold_string(plan["Relation Name"])
     )
 
-    if "Filter" in query_plan:
+    if "Filter" in plan:
         result += (
             " The result is then filtered by "
-            + bold_string(query_plan["Filter"].replace("::text", ""))
+            + bold_string(plan["Filter"].replace("::text", ""))
             + "."
         )
     return result
 
 
-def index_only_scan_explain(query_plan):
+def index_only_scan_natural_explain(plan):
     result = ""
     result += (
         f"An {bold_string('Index Scan')} operation is done using "
-        + bold_string(query_plan["Index Name"])
+        + bold_string(plan["Index Name"])
         + " index table"
     )
-    if "Index Cond" in query_plan:
+    if "Index Cond" in plan:
         result += " with the condition(s) " + bold_string(
-            query_plan["Index Cond"].replace("::text", "")
+            plan["Index Cond"].replace("::text", "")
         )
     result += ". Matches are then returned as the result."
-    if "Filter" in query_plan:
+    if "Filter" in plan:
         result += (
             " The result is finally filtered by: "
-            + bold_string(query_plan["Filter"].replace("::text", ""))
+            + bold_string(plan["Filter"].replace("::text", ""))
             + "."
         )
 
     return result
 
 
-def limit_explain(query_plan):
-    result = f"A scan is performed with a {bold_string('limit')} of {query_plan['Plan Rows']} entries."
+def limit_natural_explain(plan):
+    result = f"A scan is performed with a {bold_string('limit')} of {plan['Plan Rows']} entries."
     return result
 
 
-def materialize_explain():
-    result = "The results of previous operation(s) are stored in physical memory/disk for faster access."
+def materialize_natural_explain():
+    result = f"{bold_string('Materialize')} operation is performed. This means the results of previous operation(s) are stored in physical memory/disk for faster access."
     return result
 
 
-def unique_explain():
+def unique_natural_explain():
     result = f"A scan is performed on previous results to remove {bold_string('un-unique')} values."
     return result
 
 
-def merge_join_explain(query_plan):
+def merge_join_natural_explain(plan):
     result = f"{bold_string('Merge Join')} operation is performed on results from sub-operations"
 
-    if "Merge Cond" in query_plan:
+    if "Merge Cond" in plan:
         result += " on the condition " + bold_string(
-            query_plan["Merge Cond"].replace("::text", "")
+            plan["Merge Cond"].replace("::text", "")
         )
 
     if "Join Type" == "Semi":
@@ -150,125 +150,158 @@ def merge_join_explain(query_plan):
     return result
 
 
-def setop_explain(query_plan):
+def setop_natural_explain(plan):
     result = "Results are returned base on the"
-    cmd_name = bold_string(str(query_plan["Command"]))
+    cmd_name = bold_string(str(plan["Command"]))
     if cmd_name == "Except" or cmd_name == "Except All":
         result += "differences "
     else:
         result += "similarities "
     result += (
         "between the two previously scanned tables using the {} operation.".format(
-            bold_string(query_plan["Node Type"])
+            bold_string(plan["Node Type"])
         )
     )
 
     return result
 
 
-def subquery_scan_explain():
+def subquery_scan_natural_explain():
     result = f"{bold_string('Subquery scan')} operation is performed on results from sub-operations without any changes."
     return result
 
 
-def values_scan_explain():
+def values_scan_natural_explain():
     result = f"A {bold_string('Values Scan')} operation is performed using the values given in query."
     return result
 
 
-def seq_scan_explain(query_plan):
+def seq_scan_natural_explain(plan):
     sentence = f"{bold_string('Sequential Scan')} operation is performed on relation "
-    if "Relation Name" in query_plan:
-        sentence += bold_string(query_plan["Relation Name"])
-    if "Alias" in query_plan:
-        if query_plan["Relation Name"] != query_plan["Alias"]:
-            sentence += " with the alias of {}".format(query_plan["Alias"])
-    if "Filter" in query_plan:
-        sentence += " and filtered by {}".format(
-            query_plan["Filter"].replace("::text", "")
-        )
+    if "Relation Name" in plan:
+        sentence += bold_string(plan["Relation Name"])
+    if "Alias" in plan:
+        if plan["Relation Name"] != plan["Alias"]:
+            sentence += " with the alias of {}".format(plan["Alias"])
+    if "Filter" in plan:
+        sentence += " and filtered by {}".format(plan["Filter"].replace("::text", ""))
     sentence += "."
 
     return sentence
 
 
-def nested_loop_explain():
-    result = f"The join results between the {bold_string('Nested Loop')} scans of the suboperations are returned."
+def nested_loop_natural_explain():
+    result = f"{bold_string('Nested Loop')} is performed to join results between the scans of the suboperations."
     return result
 
 
-def sort_explain(query_plan):
+def sort_natural_explain(plan):
     result = f"The result is {bold_string('Sorted')} using the attribute "
-    if "DESC" in query_plan["Sort Key"]:
+    if "DESC" in plan["Sort Key"]:
         result += (
-            bold_string(str(query_plan["Sort Key"].replace("DESC", "")))
+            bold_string(str(plan["Sort Key"].replace("DESC", "")))
             + " in descending order of "
         )
-    elif "INC" in query_plan["Sort Key"]:
+    elif "INC" in plan["Sort Key"]:
         result += (
-            bold_string(str(query_plan["Sort Key"].replace("INC", "")))
+            bold_string(str(plan["Sort Key"].replace("INC", "")))
             + " in ascending order of "
         )
     else:
-        result += bold_string(str(query_plan["Sort Key"]))
+        result += bold_string(str(plan["Sort Key"]))
     result += "."
     return result
 
 
-def hash_explain():
+def hash_natural_explain():
     result = f"{bold_string('Hash')} function is used to make a memory {bold_string('hash')} using the table rows."
     return result
 
 
-def hash_join_explain(query_plan):
-    result = f"The result from previous operation is joined using {bold_string('Hash')} {bold_string(query_plan['Join Type'])} {bold_string('Join')}"
-    if "Hash Cond" in query_plan:
+def hash_join_natural_explain(plan):
+    result = f"The result from previous operation is joined using {bold_string('Hash')} {bold_string(plan['Join Type'])} {bold_string('Join')}"
+    if "Hash Cond" in plan:
         result += " on the condition: {}".format(
-            bold_string(query_plan["Hash Cond"].replace("::text", ""))
+            bold_string(plan["Hash Cond"].replace("::text", ""))
         )
     result += "."
     return result
 
 
-def explain(query_plan):
-    match query_plan["Node Type"]:
+def bitmap_heap_scan_natural_explain(plan):
+    result = f"With the result from the previous {bold_string('Bitmap Index Scan')}, {bold_string('Bitmap Heap Scan')} is performed on {bold_string(plan['Relation Name'])} table. To get results matching the condition {bold_string(plan['Recheck Cond'])} which is used to create the Bitmap."
+    return result
+
+
+def bitmap_index_scan_natural_explain(plan):
+    result = f"{bold_string('Bitmap Index Scan')} is performed on {bold_string(plan['Index Name'])} with index condition of {bold_string(plan['Index Cond'])} to create a Bitmap."
+    return result
+
+
+def memoize_natural_explain(plan):
+    result = f"The previous sub-operation result is then {bold_string('Memoized')}. This means that the result is cached with cache key of {bold_string(plan['Cache Key'])}."
+    return result
+
+
+def gather_merge_natural_explain():
+    result = f"{bold_string('Gather Merge')} operation is performed on the results from parallel sub-operations. The results {bold_string('Sorted')} order is preserved."
+    return result
+
+
+def gather_natural_explain():
+    result = f"{bold_string('Gather')} operation is performed on the results from parallel sub-operations. The results order is {bold_string('Not')} preserved unlike {bold_string('Gather Merge')}."
+    return result
+
+
+def natural_explain(plan):
+    match plan["Node Type"]:
         case "Aggregate":
-            return aggregate_explain(query_plan)
+            return aggregate_natural_explain(plan)
         case "Append":
-            return append_explain()
+            return append_natural_explain()
         case "CTE Scan":
-            return cte_explain(query_plan)
+            return cte_natural_explain(plan)
         case "Function Scan":
-            return function_scan_explain(query_plan)
+            return function_scan_natural_explain(plan)
         case "Group":
-            return group_explain(query_plan)
+            return group_natural_explain(plan)
         case "Index Scan":
-            return index_scan_explain(query_plan)
+            return index_scan_natural_explain(plan)
         case "Index Only Scan":
-            return index_only_scan_explain(query_plan)
+            return index_only_scan_natural_explain(plan)
         case "Limit":
-            return limit_explain(query_plan)
+            return limit_natural_explain(plan)
         case "Materialize":
-            return materialize_explain()
+            return materialize_natural_explain()
         case "Unique":
-            return unique_explain()
+            return unique_natural_explain()
         case "Merge Join":
-            return merge_join_explain(query_plan)
+            return merge_join_natural_explain(plan)
         case "SetOp":
-            return setop_explain(query_plan)
+            return setop_natural_explain(plan)
         case "Subquery Scan":
-            return subquery_scan_explain()
+            return subquery_scan_natural_explain()
         case "Values Scan":
-            return values_scan_explain()
+            return values_scan_natural_explain()
         case "Seq Scan":
-            return seq_scan_explain(query_plan)
+            return seq_scan_natural_explain(plan)
         case "Nested Loop":
-            return nested_loop_explain()
+            return nested_loop_natural_explain()
         case "Sort":
-            return sort_explain(query_plan)
+            return sort_natural_explain(plan)
         case "Hash":
-            return hash_explain()
+            return hash_natural_explain()
         case "Hash Join":
-            return hash_join_explain(query_plan)
+            return hash_join_natural_explain(plan)
+        case "Bitmap Heap Scan":
+            return bitmap_heap_scan_natural_explain(plan)
+        case "Bitmap Index Scan":
+            return bitmap_index_scan_natural_explain(plan)
+        case "Memoize":
+            return memoize_natural_explain(plan)
+        case "Gather Merge":
+            return gather_merge_natural_explain()
+        case "Gather":
+            return gather_natural_explain()
         case _:
-            return query_plan["Node Type"]
+            return plan["Node Type"]

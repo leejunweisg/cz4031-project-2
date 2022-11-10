@@ -195,13 +195,20 @@
                           <h3>Metrics</h3>
                         </div>
                         <div class="col-md-4">
-                          <h4 class="font-weight-bold mb-1">Total Cost</h4>
+                          <h4 class="font-weight-bold mb-1">Total Cost <i class="fa-solid fa-circle-info ml-1"
+                                                                          data-toggle="tooltip" data-placement="top"
+                                                                          title="The sum of the total cost of each operation in the query plan."></i>
+                          </h4>
                           <p>
                             {{ "{:,.2f}".format(summary_data[loop.index0]["total_cost"]) }}
                           </p>
                         </div>
                         <div class="col-md-4">
-                          <h4 class="font-weight-bold mb-1">Number of operations</h4>
+                          <h4 class="font-weight-bold mb-1">Number of operations <i class="fa-solid fa-circle-info ml-1"
+                                                                                    data-toggle="tooltip"
+                                                                                    data-placement="top"
+                                                                                    title="The number of operation nodes in the query plan."></i>
+                          </h4>
                           <p>{{ summary_data[loop.index0]["nodes_count"] }}</p>
                         </div>
                       </div>

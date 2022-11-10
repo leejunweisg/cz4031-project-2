@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2 import ProgrammingError
 
 from annotation import get_plan_summary, get_graph_data
-from explain import explain
+from explain import natural_explain
 
 # mapping of node type to runtime setting name
 params_map = {
@@ -61,16 +61,16 @@ def get_node_types(plan):
     return types
 
 
-def getNaturalExplanation(query_plan):
+def get_natural_explanation(plan):
     naturalExplanation = []
 
     # queue for bfs
-    q = deque([query_plan])
+    q = deque([plan])
     while q:
         n = len(q)
         for _ in range(n):
             node = q.popleft()
-            naturalExplanation.append(explain(node))
+            naturalExplanation.append(natural_explain(node))
             if "Plans" in node:
                 for child in node["Plans"]:
                     q.append(child)
@@ -128,9 +128,9 @@ def get_plans(user_query):
         diagram3 = get_graph_data(plan3)
 
         # get natural explanation
-        naturalExplain1 = getNaturalExplanation(plan1)
-        naturalExplain2 = getNaturalExplanation(plan2)
-        naturalExplain3 = getNaturalExplanation(plan3)
+        naturalExplain1 = get_natural_explanation(plan1)
+        naturalExplain2 = get_natural_explanation(plan2)
+        naturalExplain3 = get_natural_explanation(plan3)
 
         # add plan 1 results to result object
         result["plan_data"].append(plan1)

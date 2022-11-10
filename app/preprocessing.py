@@ -1,7 +1,7 @@
 from collections import deque
 
 import psycopg2
-from psycopg2 import ProgrammingError
+from psycopg2 import ProgrammingError, OperationalError
 
 from annotation import get_plan_summary, get_graph_data, natural_explain
 
@@ -151,8 +151,10 @@ def get_plans(user_query):
             result["summary_data"].append(summary3)
             result["natural_explain"].append(naturalExplain3)
 
+    except OperationalError as e:
+        return True, {"msg": f"An error has occurred: Failed to connect to the database! Please ensure that the database is running."}
     except Exception as e:
-        return True, {"msg": f"An error has occurred: {str(e)}"}
+        return True, {"msg": f"An error has occurred: {repr(e)}"}
 
     # return False for no error, and results
     return False, result

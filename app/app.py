@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, jsonify
 import psycopg2
 from collections import deque
 from preprocessing import get_plans
-from explain import explain
+from annotation import natural_explain
 
 app = Flask(__name__)
 
@@ -100,7 +100,7 @@ def index():
 #     return nodeTypeList
 
 
-# def getNaturalExplanation(query_plan):
+# def get_natural_explanation(query_plan):
 #     naturalExplanation = []
 #     # queue for bfs
 #     q = deque([query_plan])
@@ -108,7 +108,7 @@ def index():
 #         n = len(q)
 #         for _ in range(n):
 #             node = q.popleft()
-#             naturalExplanation.append(explain(node))
+#             naturalExplanation.append(natural_explain(node))
 #             if "Plans" in node:
 #                 for child in node["Plans"]:
 #                     q.append(child)
@@ -243,11 +243,11 @@ def index():
 
 #         planResultDiagram3 = getImptPlanDetails(planResult3[0][0][0].get("Plan"))
 
-#         naturalLang1 = getNaturalExplanation(planResult1[0][0][0].get("Plan"))
+#         naturalLang1 = get_natural_explanation(planResult1[0][0][0].get("Plan"))
 
-#         naturalLang2 = getNaturalExplanation(planResult2[0][0][0].get("Plan"))
+#         naturalLang2 = get_natural_explanation(planResult2[0][0][0].get("Plan"))
 
-#         naturalLang3 = getNaturalExplanation(planResult3[0][0][0].get("Plan"))
+#         naturalLang3 = get_natural_explanation(planResult3[0][0][0].get("Plan"))
 
 #         result["plan_data"]["Plan 1"] = planResult1[0][0][0]
 #         result["graph_data"]["Plan 1"] = planResultDiagram1

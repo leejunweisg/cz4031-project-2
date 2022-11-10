@@ -3,8 +3,7 @@ from collections import deque
 import psycopg2
 from psycopg2 import ProgrammingError
 
-from annotation import get_plan_summary, get_graph_data
-from explain import natural_explain
+from annotation import get_plan_summary, get_graph_data, natural_explain
 
 # mapping of node type to runtime setting name
 params_map = {

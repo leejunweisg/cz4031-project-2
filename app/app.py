@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, jsonify
 import psycopg2
 from collections import deque
 from preprocessing import get_plans
-from explain import natural_explain
+from annotation import natural_explain
 
 app = Flask(__name__)
 

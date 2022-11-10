@@ -127,7 +127,7 @@
               <h6 class="card-subtitle mt-2 text-muted">
                 Enter your SQL query here!
               </h6>
-              <form method="POST">
+              <form id="query-form" method="POST">
                 <div class="form-group">
                   <label for="id-query"> </label>
                   <textarea
@@ -142,6 +142,7 @@
                     resize: vertical;
                     max-height: 100%;
                     min-height: 100px;
+                    font-family: 'JetBrains Mono', monospace;
                   "
                       required
                   >
@@ -149,7 +150,7 @@
                   >
                 </div>
                 <div class="float-right">
-                  <button class="btn btn-primary">Go!</button>
+                  <button class="btn btn-primary" id="go-btn">Go!</button>
                 </div>
               </form>
             </div>
@@ -274,10 +275,19 @@
     </div>
   </div>
 
-{% endblock body %} {% block js %}
+{% endblock body %}
+{% block js %}
   <script src="//cdn.amcharts.com/lib/5/index.js"></script>
   <script src="//cdn.amcharts.com/lib/5/hierarchy.js"></script>
   <script src="//cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+  <script>
+      $('#query-form').submit(function () {
+          const goBtn = $('#go-btn');
+          goBtn.prop("disabled", true);
+          goBtn.html("Loading...");
+          return true;
+      });
+  </script>
   <script>
       const root = am5.Root.new("chartdiv");
 

@@ -3,7 +3,7 @@ from collections import deque
 import psycopg2
 from psycopg2 import ProgrammingError, OperationalError
 
-from annotation import get_plan_summary, get_graph_data, natural_explain
+from annotation import get_plan_summary, natural_explain
 
 # mapping of node type to runtime setting name
 params_map = {
@@ -33,7 +33,7 @@ class DatabaseConnection:
     def get_conn(cls):
         if cls._conn is None:
             cls._conn = psycopg2.connect(
-                host="postgres",
+                host="localhost",
                 database="TPC-H",
                 user="postgres",
                 password="password123",
@@ -60,6 +60,29 @@ def get_node_types(plan):
     return types
 
 
+def get_plan_comparison_attr(plan):
+    inter_result = {"text": {"name": ""}}
+
+    # get all key:value pair with string value
+    for value in plan.items():
+        if isinstance(value, str):
+            inter_result["text"]["name"] += value + " "
+
+    # remove last space from string
+    inter_result["text"]["name"] = inter_result["text"]["name"][:-1]
+
+    children_details = []
+
+    if plan.get("Plans") is not None:
+        for plan in plan.get("Plans"):
+            children_details.append(get_plan_comparison_attr(plan))
+
+    if len(children_details) != 0:
+        inter_result["children"] = children_details
+
+    return inter_result
+
+
 def get_natural_explanation(plan):
     naturalExplanation = []
 
@@ -83,7 +106,7 @@ def get_plans(user_query):
 
     Returns:
         - error boolean: True if error, False otherwise
-        - result dictionary: contains message if error, else contains plan_data and graph_data
+        - result dictionary: contains message if error, else contains plan_data, summary_data and natural_explain
     """
 
     # query string with placeholder
@@ -92,7 +115,6 @@ def get_plans(user_query):
     # dictionary to store results
     result = {
         "plan_data": [],
-        "graph_data": [],
         "summary_data": [],
         "natural_explain": [],
     }
@@ -116,43 +138,50 @@ def get_plans(user_query):
         plan2 = get_alt_plan(query_str, prev_plan=plan1)
         plan3 = get_alt_plan(query_str, prev_plan=plan2)
 
-        # parse results for summary
+        # parse results for summary for plan 1
         summary1 = get_plan_summary(plan1)
-        summary2 = get_plan_summary(plan2)
-        summary3 = get_plan_summary(plan3)
 
-        # parse results for diagram
-        diagram1 = get_graph_data(plan1)
-        diagram2 = get_graph_data(plan2)
-        diagram3 = get_graph_data(plan3)
+        # get comparison attributes for plans
+        planCompAttr1 = get_plan_comparison_attr(plan1)
+        planCompAttr2 = get_plan_comparison_attr(plan2)
+        planCompAttr3 = get_plan_comparison_attr(plan3)
 
-        # get natural explanation
+        # get natural explanation for plan 1
         naturalExplain1 = get_natural_explanation(plan1)
-        naturalExplain2 = get_natural_explanation(plan2)
-        naturalExplain3 = get_natural_explanation(plan3)
 
         # add plan 1 results to result object
         result["plan_data"].append(plan1)
-        result["graph_data"].append(diagram1)
         result["summary_data"].append(summary1)
         result["natural_explain"].append(naturalExplain1)
 
         # check if plan2 is the same as plan1
-        if diagram2 != diagram1:
+        if planCompAttr2 != planCompAttr1:
             result["plan_data"].append(plan2)
-            result["graph_data"].append(diagram2)
+
+            # parse results for summary for plan 2
+            summary2 = get_plan_summary(plan2)
             result["summary_data"].append(summary2)
+
+            # get natural explanation for plan 2
+            naturalExplain2 = get_natural_explanation(plan2)
             result["natural_explain"].append(naturalExplain2)
 
         # check if plan3 is the same as plan1 or plan2
-        if diagram3 != diagram1 and diagram3 != diagram2:
+        if planCompAttr3 != planCompAttr1 and planCompAttr3 != planCompAttr2:
             result["plan_data"].append(plan3)
-            result["graph_data"].append(diagram3)
+
+            # parse results for summary for plan 3
+            summary3 = get_plan_summary(plan3)
             result["summary_data"].append(summary3)
+
+            # get natural explanation for plan 3
+            naturalExplain3 = get_natural_explanation(plan3)
             result["natural_explain"].append(naturalExplain3)
 
     except OperationalError as e:
-        return True, {"msg": f"An error has occurred: Failed to connect to the database! Please ensure that the database is running."}
+        return True, {
+            "msg": f"An error has occurred: Failed to connect to the database! Please ensure that the database is running."
+        }
     except Exception as e:
         return True, {"msg": f"An error has occurred: {repr(e)}"}
 

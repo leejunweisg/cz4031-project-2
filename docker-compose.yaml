@@ -10,8 +10,8 @@ services:
     depends_on:
       - postgres
     ports:
-      - 5001:5001
-    command: python3 app.py
+      - 5000:5000
+    command: python3 project.py
 
   postgres:
     container_name: postgres

@@ -33,7 +33,7 @@ class DatabaseConnection:
     def get_conn(cls):
         if cls._conn is None:
             cls._conn = psycopg2.connect(
-                host="localhost",
+                host="postgres",
                 database="TPC-H",
                 user="postgres",
                 password="password123",
@@ -84,7 +84,7 @@ def get_plan_comparison_attr(plan):
 
 
 def get_natural_explanation(plan):
-    naturalExplanation = []
+    natural_explanation = []
 
     # queue for bfs
     q = deque([plan])
@@ -92,12 +92,12 @@ def get_natural_explanation(plan):
         n = len(q)
         for _ in range(n):
             node = q.popleft()
-            naturalExplanation.append(natural_explain(node))
+            natural_explanation.append(natural_explain(node))
             if "Plans" in node:
                 for child in node["Plans"]:
                     q.append(child)
 
-    return naturalExplanation[::-1]
+    return natural_explanation[::-1]
 
 
 def get_plans(user_query):
@@ -142,20 +142,20 @@ def get_plans(user_query):
         summary1 = get_plan_summary(plan1)
 
         # get comparison attributes for plans
-        planCompAttr1 = get_plan_comparison_attr(plan1)
-        planCompAttr2 = get_plan_comparison_attr(plan2)
-        planCompAttr3 = get_plan_comparison_attr(plan3)
+        plan_comp_attr1 = get_plan_comparison_attr(plan1)
+        plan_comp_attr2 = get_plan_comparison_attr(plan2)
+        plan_comp_attr3 = get_plan_comparison_attr(plan3)
 
         # get natural explanation for plan 1
-        naturalExplain1 = get_natural_explanation(plan1)
+        natural_explain1 = get_natural_explanation(plan1)
 
         # add plan 1 results to result object
         result["plan_data"].append(plan1)
         result["summary_data"].append(summary1)
-        result["natural_explain"].append(naturalExplain1)
+        result["natural_explain"].append(natural_explain1)
 
         # check if plan2 is the same as plan1
-        if planCompAttr2 != planCompAttr1:
+        if plan_comp_attr2 != plan_comp_attr1:
             result["plan_data"].append(plan2)
 
             # parse results for summary for plan 2
@@ -163,11 +163,11 @@ def get_plans(user_query):
             result["summary_data"].append(summary2)
 
             # get natural explanation for plan 2
-            naturalExplain2 = get_natural_explanation(plan2)
-            result["natural_explain"].append(naturalExplain2)
+            natural_explain2 = get_natural_explanation(plan2)
+            result["natural_explain"].append(natural_explain2)
 
         # check if plan3 is the same as plan1 or plan2
-        if planCompAttr3 != planCompAttr1 and planCompAttr3 != planCompAttr2:
+        if plan_comp_attr3 != plan_comp_attr1 and plan_comp_attr3 != plan_comp_attr2:
             result["plan_data"].append(plan3)
 
             # parse results for summary for plan 3
@@ -175,8 +175,8 @@ def get_plans(user_query):
             result["summary_data"].append(summary3)
 
             # get natural explanation for plan 3
-            naturalExplain3 = get_natural_explanation(plan3)
-            result["natural_explain"].append(naturalExplain3)
+            natural_explain3 = get_natural_explanation(plan3)
+            result["natural_explain"].append(natural_explain3)
 
     except OperationalError as e:
         return True, {

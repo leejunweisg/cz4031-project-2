@@ -1,6 +1,65 @@
 from collections import deque
 
 
+def get_from_subquery(query):
+    fromSplit = query.split("from", 1)[1]
+    removeWhere = "from" + fromSplit.split("where", 1)[0]
+    return removeWhere
+
+
+def get_where_subquery(query):
+    try:
+        splitWhere = "where" + query.split("where", 1)[1]
+        return splitWhere
+    except:
+        return ""
+
+
+def get_from_relation_names(fromSubQuery):
+    subQueryList = fromSubQuery.split(",")
+
+    result = []
+    for i in subQueryList:
+        split = i.split(" ")
+        if len(split) <= 3:
+            for j in split:
+                if j != "":
+                    result.append(j.strip())
+    return result
+
+
+def get_from_annotation_list(fromRelationNameList, naturalExplainList):
+    result = []
+    for i in naturalExplainList:
+        for j in fromRelationNameList:
+            if "<b>{}</b>".format(j) in i:
+                result.append(i)
+
+    # remove duplicates
+    result = list(dict.fromkeys(result))
+
+    return result
+
+
+def get_where_annotation_list(fromRelationNameList, naturalExplainList):
+    result = []
+    for i in naturalExplainList:
+        if i not in fromRelationNameList:
+            result.append(i)
+
+    return result
+
+
+def get_query_plan_annotation(fromSubQuery, naturalLang1):
+    fromRelationNameList = get_from_relation_names(fromSubQuery)
+
+    fromAnnotationList = get_from_annotation_list(fromRelationNameList, naturalLang1)
+
+    whereAnnotationList = get_where_annotation_list(fromAnnotationList, naturalLang1)
+
+    return {"from": fromAnnotationList, "where": whereAnnotationList}
+
+
 def get_plan_summary(plan):
     """
     Produces a summary given a query plan.

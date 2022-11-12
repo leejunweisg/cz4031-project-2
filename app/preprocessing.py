@@ -3,7 +3,13 @@ from collections import deque
 import psycopg2
 from psycopg2 import ProgrammingError, OperationalError
 
-from annotation import get_plan_summary, natural_explain
+from annotation import (
+    get_plan_summary,
+    natural_explain,
+    get_from_subquery,
+    get_where_subquery,
+    get_query_plan_annotation,
+)
 
 # mapping of node type to runtime setting name
 params_map = {
@@ -33,7 +39,7 @@ class DatabaseConnection:
     def get_conn(cls):
         if cls._conn is None:
             cls._conn = psycopg2.connect(
-                host="postgres",
+                host="localhost",
                 database="TPC-H",
                 user="postgres",
                 password="password123",
@@ -117,6 +123,8 @@ def get_plans(user_query):
         "plan_data": [],
         "summary_data": [],
         "natural_explain": [],
+        "annotation": [],
+        "subquery": {},
     }
 
     try:
@@ -134,6 +142,13 @@ def get_plans(user_query):
                 cur.execute("ROLLBACK;")
                 return True, {"msg": f"Invalid SQL query!"}
 
+        # get subqueries
+        fromSubQuery = get_from_subquery(user_query)
+        whereSubQuery = get_where_subquery(user_query)
+
+        result["subquery"]["from"] = fromSubQuery
+        result["subquery"]["where"] = whereSubQuery
+
         # get alternative plans by passing in the previous plan
         plan2 = get_alt_plan(query_str, prev_plan=plan1)
         plan3 = get_alt_plan(query_str, prev_plan=plan2)
@@ -149,10 +164,14 @@ def get_plans(user_query):
         # get natural explanation for plan 1
         natural_explain1 = get_natural_explanation(plan1)
 
+        # get annotation for plan 1
+        planAnnotation1 = get_query_plan_annotation(fromSubQuery, natural_explain1)
+
         # add plan 1 results to result object
         result["plan_data"].append(plan1)
         result["summary_data"].append(summary1)
         result["natural_explain"].append(natural_explain1)
+        result["annotation"].append(planAnnotation1)
 
         # check if plan2 is the same as plan1
         if plan_comp_attr2 != plan_comp_attr1:
@@ -166,6 +185,10 @@ def get_plans(user_query):
             natural_explain2 = get_natural_explanation(plan2)
             result["natural_explain"].append(natural_explain2)
 
+            # get annotation for plan 2
+            planAnnotation2 = get_query_plan_annotation(fromSubQuery, natural_explain2)
+            result["annotation"].append(planAnnotation2)
+
         # check if plan3 is the same as plan1 or plan2
         if plan_comp_attr3 != plan_comp_attr1 and plan_comp_attr3 != plan_comp_attr2:
             result["plan_data"].append(plan3)
@@ -177,6 +200,10 @@ def get_plans(user_query):
             # get natural explanation for plan 3
             natural_explain3 = get_natural_explanation(plan3)
             result["natural_explain"].append(natural_explain3)
+
+            # get annotation for plan 3
+            planAnnotation3 = get_query_plan_annotation(fromSubQuery, natural_explain3)
+            result["annotation"].append(planAnnotation3)
 
     except OperationalError as e:
         return True, {

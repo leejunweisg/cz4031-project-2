@@ -33,7 +33,7 @@ class DatabaseConnection:
     def get_conn(cls):
         if cls._conn is None:
             cls._conn = psycopg2.connect(
-                host="postgres",
+                host="localhost",
                 database="TPC-H",
                 user="postgres",
                 password="password123",
